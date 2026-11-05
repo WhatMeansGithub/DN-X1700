@@ -1,0 +1,62 @@
+# Verifies the patch data against Denon's real firmware (downloaded here, never stored in the repo), then publishes the web tool.
+name: Web tool
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Download Denon's firmware (used for the checks only)
+        run: |
+          curl -fsSL -o fw.zip https://cdn.inmusicbrands.com/denondj/legacy/dnx1700/firmware-dnx1700-v2000.zip
+          mkdir -p firmware/original
+          unzip -o -j fw.zip X1700FW.BIN -d firmware/original
+          echo "24ef3d26a116118d27787c337a8a89d67cb6b314cca38f6f22d906b3785556f3  firmware/original/X1700FW.BIN" | sha256sum -c -
+      - run: pip install -r requirements.txt
+      - name: Web tool data matches the patch files
+        run: |
+          python tools/gen_site_data.py
+          git diff --exit-code -- site/patches.js patches/patches.json
+      - name: Program builds the reference image
+        run: python tools/x1700_patcher.py --yes --file fw.zip --out out
+      - name: Web patcher tests
+        run: node site/test.mjs firmware/original/X1700FW.BIN
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish only the page files
+        run: |
+          mkdir _site
+          cp site/index.html site/patcher.js site/patches.js _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

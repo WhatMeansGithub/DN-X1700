@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DN-X1700 Mac USB fix</title>
+<meta name="description" content="Patch your Denon DN-X1700 firmware so USB audio works on current macOS. Runs entirely in your browser.">
+<style>
+  :root { --bg:#fafaf8; --fg:#1d1d1b; --muted:#5f5f5a; --card:#fff; --line:#d9d9d2; --accent:#1b5fd1; --accent-fg:#fff;
+          --warn-bg:#fff4e0; --warn-line:#e0a030; --bad-bg:#fdeaea; --bad-line:#c0392b; --good-bg:#e8f6ec; --good-line:#2e8b4f; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#141413; --fg:#ececea; --muted:#a3a39c; --card:#1d1d1b; --line:#3a3a36; --accent:#6aa0ff; --accent-fg:#101010;
+            --warn-bg:#2d2412; --warn-line:#a87a24; --bad-bg:#2e1716; --bad-line:#d1584a; --good-bg:#14261a; --good-line:#3fa766; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:1.7rem; margin:0 0 4px; }
+  h2 { font-size:1.15rem; margin:0 0 8px; }
+  p { margin:0 0 10px; }
+  .sub { color:var(--muted); margin-bottom:20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin:16px 0; }
+  .warn { background:var(--warn-bg); border-color:var(--warn-line); }
+  .bad { background:var(--bad-bg); border-color:var(--bad-line); }
+  .good { background:var(--good-bg); border-color:var(--good-line); }
+  .step { display:flex; gap:12px; }
+  .num { flex:none; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--accent-fg); display:grid; place-items:center; font-weight:700; font-size:.9rem; margin-top:2px; }
+  .step > div { flex:1; min-width:0; }
+  a { color:var(--accent); }
+  #drop { border:2px dashed var(--line); border-radius:10px; padding:28px 12px; text-align:center; cursor:pointer; color:var(--muted); }
+  #drop.over, #drop:focus-visible { border-color:var(--accent); color:var(--fg); outline:none; }
+  button, .btn { font:inherit; background:var(--accent); color:var(--accent-fg); border:0; border-radius:8px; padding:10px 18px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block; }
+  button[disabled] { opacity:.45; cursor:not-allowed; }
+  label.check { display:flex; gap:10px; align-items:flex-start; margin:10px 0; cursor:pointer; }
+  label.check input { margin-top:5px; width:18px; height:18px; flex:none; }
+  code { font:.9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break:break-all; }
+  ul, ol { margin:6px 0 10px 20px; padding:0; }
+  details { margin-top:8px; }
+  table { border-collapse:collapse; width:100%; font-size:.85rem; }
+  td, th { border-bottom:1px solid var(--line); padding:4px 6px; text-align:left; vertical-align:top; }
+  .hidden { display:none; }
+  footer { color:var(--muted); font-size:.85rem; margin-top:28px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DN-X1700 Mac USB fix</h1>
+  <p class="sub">Patch your Denon DN-X1700's firmware so its USB audio works on current macOS. Everything happens in your browser:
+     <strong>your file is never uploaded</strong>, and this page contains no Denon firmware.</p>
+
+  <div class="card bad">
+    <h2>Read this first</h2>
+    <p><strong>Flashing firmware can permanently destroy your mixer.</strong> The mixer's updater erases the whole flash chip and rewrites it.
+       If power is lost or anything goes wrong during the ~30 second write, <strong>the mixer will not start again</strong> and can only be
+       recovered with an external flash programmer. This project is provided as is, <strong>without warranty, and the author accepts no
+       responsibility</strong> for bricked mixers or any other damage.</p>
+    <p><strong>Your settings and presets will be reset to factory defaults.</strong> Write down or photograph your settings first.</p>
+    <p>Tested on one unit with macOS 27 (Apple Silicon) and Windows. Full details: <a href="https://github.com/WhatMeansGithub/DN-X1700#readme">README</a>.</p>
+  </div>
+
+  <div class="card step">
+    <div class="num">1</div>
+    <div>
+      <h2>Get Denon's official firmware</h2>
+      <p>Download Denon's v2.000 firmware (a small zip file) from Denon's own server:</p>
+      <p><a class="btn" href="https://cdn.inmusicbrands.com/denondj/legacy/dnx1700/firmware-dnx1700-v2000.zip">Download firmware-dnx1700-v2000.zip</a></p>
+      <p class="sub" style="margin:0">You don't need to unzip it. (Browsers can't fetch it for you, because Denon's server doesn't allow it.)</p>
+    </div>
+  </div>
+
+  <div class="card step">
+    <div class="num">2</div>
+    <div>
+      <h2>Drop the file here</h2>
+      <div id="drop" tabindex="0" role="button" aria-label="Choose or drop the firmware file">
+        Drop <code>firmware-dnx1700-v2000.zip</code> (or <code>X1700FW.BIN</code>) here, or click to choose it
+      </div>
+      <input id="file" type="file" class="hidden" accept=".zip,.bin,.BIN">
+      <div id="msg" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div id="result" class="card step hidden">
+    <div class="num">3</div>
+    <div>
+      <h2>Download the patched firmware</h2>
+      <div class="card good" style="margin:8px 0">
+        <p style="margin:0"><strong>Verified.</strong> The original was checked byte for byte, the patches were applied, the updater checksum is correct, and the result
+           matches the reference build.</p>
+        <p style="margin:6px 0 0">Result sha256: <code id="sha"></code></p>
+      </div>
+      <label class="check"><input type="checkbox" id="ack">
+        <span>I have read the warning above. I understand this can permanently damage my mixer, that my settings will be reset, and that nobody
+        is responsible for the outcome but me.</span></label>
+      <p><button id="dl" disabled>Download X1700FW.BIN</button></p>
+      <details><summary>What was changed (<span id="nchanges"></span> places)</summary>
+        <table id="changes"><thead><tr><th>Offset</th><th>Was</th><th>Now</th><th>Why</th></tr></thead><tbody></tbody></table>
+      </details>
+    </div>
+  </div>
+
+  <div class="card step">
+    <div class="num">4</div>
+    <div>
+      <h2>Flash it</h2>
+      <ol>
+        <li>Put <code>X1700FW.BIN</code> in the <strong>root</strong> of a <strong>FAT32</strong> USB stick (MBR partition table; a small stick is safest). Keep the name exactly <code>X1700FW.BIN</code>.</li>
+        <li>Mixer <strong>off</strong>. Insert the stick into the <strong>rear USB-A</strong> port.</li>
+        <li>Hold <strong>MIC2</strong> and <strong>DUCKING</strong>, switch the mixer <strong>on</strong>, keep holding until the display says <strong>"Version UP Mode"</strong>.</li>
+        <li>Press <strong>Master EFX INS 1</strong>. It shows <strong>"Version UP execute?"</strong> and <strong>"Ver.2000 &gt;&gt;&gt; Ver.2000"</strong> (the version number does not change).
+            <em>To cancel safely, switch the mixer off here. Nothing has been written yet.</em></li>
+        <li>Press <strong>Master EFX INS 2</strong>. <strong>Do not touch anything</strong> until <strong>"Version UP complete! Shut the power OFF"</strong> appears (about 30 seconds). Use stable mains power.</li>
+        <li>Switch off and on. Re-enter your settings.</li>
+      </ol>
+      <div class="card warn" style="margin:8px 0">
+        <p style="margin:0"><strong>Then, for the Mac:</strong> Utility, System Setting: <strong>PC/MAC = MAC</strong>, USB mode <strong>USB B</strong>, choose the sampling frequency
+        (44.1, 48 or 96 kHz), and <strong>power-cycle the mixer</strong>. Do this again every time you change PC/MAC or the sample rate. macOS follows the mixer's rate by itself.</p>
+      </div>
+      <p>If an error code appears on the display, write it down and don't switch off straight away; the updater retries by itself.
+         To go back to the original firmware, flash Denon's original <code>X1700FW.BIN</code> the same way.</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>Free software, GPL-3.0-or-later. Not affiliated with Denon DJ or inMusic. This page includes no Denon code: it applies a small set of byte changes to a file
+       you download from Denon, on your own computer. <a href="https://github.com/WhatMeansGithub/DN-X1700">Source and documentation on GitHub</a>.</p>
+  </footer>
+</main>
+
+<script src="patches.js"></script>
+<script src="patcher.js"></script>
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const drop = $('drop'), input = $('file'), msg = $('msg'), result = $('result'), dl = $('dl'), ack = $('ack');
+  let patched = null, url = null;
+
+  function show(kind, html) { msg.innerHTML = '<div class="card ' + kind + '" style="margin:10px 0 0">' + html + '</div>'; }
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  async function handle(file) {
+    result.classList.add('hidden'); ack.checked = false; dl.disabled = true; patched = null;
+    if (!file) return;
+    show('', 'Checking <code>' + esc(file.name) + '</code> ...');
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const fw = await X1700.loadFirmware(bytes);
+      await new Promise((r) => setTimeout(r, 30));                 // let the message paint before the hashing
+      patched = X1700.buildImage(fw, X1700_PATCHES);
+    } catch (e) {
+      show('bad', '<strong>Not patched.</strong> ' + esc(e.message));
+      return;
+    }
+    msg.innerHTML = '';
+    $('sha').textContent = patched.sha256;
+    $('nchanges').textContent = patched.changes.length + 1;
+    const rows = patched.changes.map((c) => '<tr><td><code>0x' + c.offset.toString(16) + '</code></td><td><code>' + c.old + '</code></td><td><code>' + c.new + '</code></td><td>' + esc(c.reason) + '</td></tr>');
+    rows.push('<tr><td><code>0x3ffffc</code></td><td><code>' + patched.checksumWord.old + '</code></td><td><code>' + patched.checksumWord.new + '</code></td><td>Updater checksum word (the updater refuses images whose checksum is wrong).</td></tr>');
+    document.querySelector('#changes tbody').innerHTML = rows.join('');
+    result.classList.remove('hidden');
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  ack.addEventListener('change', () => { dl.disabled = !(ack.checked && patched); });
+  dl.addEventListener('click', () => {
+    if (!patched || !ack.checked) return;
+    if (url) URL.revokeObjectURL(url);
+    url = URL.createObjectURL(new Blob([patched.image], { type: 'application/octet-stream' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = 'X1700FW.BIN'; document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  drop.addEventListener('click', () => input.click());
+  drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
+  input.addEventListener('change', () => handle(input.files[0]));
+  ['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', (e) => handle(e.dataTransfer.files[0]));
+})();
+</script>
+</body>
+</html>

@@ -113,7 +113,32 @@ Full details, evidence and dead ends are in `docs/`.
 
 ---
 
-## Build the patched image
+## Get the patched firmware
+
+The patched firmware itself is **not** hosted in this repository: it is Denon's code with a few bytes changed, so it can't be
+shared. You make it from Denon's own download, on your own computer, in one of three ways. **All three produce exactly the same
+file** (sha256 `aa9c868e2b3bdacfad198fc0d77edcc0e420dd6dcd16957726882bf73d7d6540`), and all three refuse to patch anything
+that is not the original Denon v2.000 firmware.
+
+### Option 1: the web tool (easiest, nothing to install)
+
+Open **https://whatmeansgithub.github.io/DN-X1700/**. It links to Denon's official download; you drop the zip on the page and
+download the patched `X1700FW.BIN`. Everything runs in your browser: **your file is never uploaded**. The page checks the
+original byte for byte, applies the patches, fixes the updater checksum, and verifies the result against the reference build.
+
+### Option 2: the program (downloads the firmware for you)
+
+Needs Python 3 (nothing else to install):
+
+```
+python3 tools/x1700_patcher.py
+```
+
+It downloads Denon's firmware, verifies and patches it, and writes `X1700FW.BIN` to the current folder. Useful options:
+`--file firmware-dnx1700-v2000.zip` (use a file you already have), `--stick /Volumes/UPDATE` (also copy it to your USB stick and
+verify the copy byte for byte), `--out folder`. It asks you to confirm that you have read the warning.
+
+### Option 3: by hand (for the careful)
 
 You need Python 3 and `pyyaml` (`pip install -r requirements.txt`).
 
@@ -211,6 +236,9 @@ the whole chip from that file). This repository does not provide support for tha
 | Path | What it is |
 |---|---|
 | `patches/` | The patches as data: offset, expected original bytes, new bytes, reason |
+| `site/` | The web tool (`index.html`, `patcher.js`, generated `patches.js`) and its tests (`test.mjs`, run with Node) |
+| `tools/x1700_patcher.py` | One-command program: downloads or loads the firmware, verifies, patches, optionally copies to the stick |
+| `tools/gen_site_data.py` | Generates the data used by the web tool and the program from `patches/*.yaml` (run it after changing a patch) |
 | `tools/build.py` | Applies patches only if the original matches byte for byte; fixes the updater checksum; writes image, diff and manifest |
 | `tools/checksum.py` | The updater's integrity rule |
 | `tools/gen_patch002.py`, `tools/sim_patch002.py` | Generates patch 002's code; simulates it in a small SH-2 interpreter |
