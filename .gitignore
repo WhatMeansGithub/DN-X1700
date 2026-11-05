@@ -1,0 +1,18 @@
+*.BIN
+.DS_Store
+firmware/extracted/
+firmware/builds/
+ghidra/
+captures/*.pcap
+captures/*.pcapng
+.venv/
+.pio/
+# Denon-owned material and private logs: never published
+docs/vendor/
+analysis/denon-win-driver/
+analysis/*.asm
+captures/
+*.zip
+__pycache__/
+*.pyc
+CLAUDE.md

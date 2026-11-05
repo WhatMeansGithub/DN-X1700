@@ -1,0 +1,23 @@
+name: usb-macos
+description: >
+  Make macOS's built-in USB audio driver (usbaudiod) accept the DN-X1700's audio function.
+  Evidence: captures/macos-*.txt (real unit), captures/macos-clone*.txt (Black Pill descriptor clone), docs/usb.md.
+status: tested on a full-speed descriptor clone only; NOT yet flashed to the real unit
+patches:
+  - offset: 0xd36ad
+    expect: "ff"
+    new: "01"
+    reason: >
+      IAD 0 (interfaces 0-2) bFunctionClass 0xFF (vendor) -> 0x01 (Audio). usbaudiod logs
+      AUAErrorCode.missingAssociation and drops the device without an audio-class IAD.
+  - offset: 0xd372c
+    expect: "05"
+    new: "00"
+    reason: >
+      AS_GENERAL (IF1, playback) bmControls 0x05 claims read-only Active Alt Setting + Valid Alt Settings controls.
+      The firmware STALLs those requests (probed on the real unit), and usbaudiod tears the device down after
+      the stalls. 0x00 = no controls claimed, so macOS does not ask.
+  - offset: 0xd3763
+    expect: "05"
+    new: "00"
+    reason: Same as above for the record stream (IF2, AS_GENERAL).
