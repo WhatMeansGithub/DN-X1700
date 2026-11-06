@@ -42,14 +42,15 @@ The DN-X1700 (2009) was class-compliant on old macOS versions, but on current ma
 device, or (after one fix) drops out every few seconds. Windows works with Denon's own driver. This project found out why,
 and fixes it **in the mixer's firmware**, so the Mac needs no driver, no kernel extension and no changes to system security.
 
-Two groups of changes, both written as data in `patches/`:
+Three groups of changes, all written as data in `patches/`:
 
 | Patch | What it changes | Why |
 |---|---|---|
 | `001-usb-macos` | 3 data bytes in the USB descriptors (2 effective) | macOS's audio daemon (`usbaudiod`) drops the device because the audio streaming interfaces claim controls the firmware never answers |
 | `002-usb-real-rate` | 148 bytes of new code plus 3 redirects | A firmware bug makes the mixer report its sample rate and clock source wrongly; macOS guesses 44.1 kHz even when the mixer runs 48 or 96 kHz, and audio drops out every few seconds |
+| `003-usb-linux-pitch` | 2 data bytes in the USB descriptors | Linux (and devices built on it, such as the Akai MPC One) tried to switch on an endpoint "pitch control" the firmware never answers; the stall made them refuse to open the audio stream ("Broken pipe -32"). Added 2026-11-06 |
 
-Plus a 4-byte update checksum that the updater requires. In total **180 bytes** of the 4 MB image differ from the original.
+Plus a 4-byte update checksum that the updater requires. In total **182 bytes** of the 4 MB image differ from the original.
 
 ### What you get
 
@@ -216,7 +217,10 @@ the updater retries a few times on its own. If it ends in an error, the flash ma
   it has not been measured. If you can compare against an unpatched mixer, please report it.
 - Lowercase commands on the internal service serial port no longer work (patch code location).
 - Audio MIDI Setup may list 44.1 kHz even when the mixer runs 48 or 96 kHz; leave the rate alone.
-- Only one unit and one Mac/Windows setup have been tested. Linux has not been tested.
+- Only one unit and one Mac/Windows setup have been tested. Patch 003 (added later) was checked on the Mac with Ableton and on an
+  Akai MPC One, where the mixer now opens and plays audio; Windows has not been re-checked with it. The MPC may show its own
+  "disk streaming isn't keeping up" warning when loading big projects; that comes from the MPC's storage and is probably unrelated.
+  Plain Linux was reproduced in a VM before the fix (`usb.md`); a re-test after the fix is still open.
 
 ---
 

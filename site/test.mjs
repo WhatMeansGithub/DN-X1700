@@ -32,7 +32,7 @@ async function suite(label, P, path, fwName, zipName, size) {
   ok(L('raw BIN: result sha256 equals reference build'), r.sha256 === P.resultSha256, r.sha256.slice(0, 16));
   ok(L('raw BIN: updater integrity rule holds (' + (P.integrity || 'word sum') + ')'), X.integrityOk(r.image, P));
   if (P.integrity === 'crc32') ok(L('raw BIN: header untouched (last 32 bytes except the CRC)'), X.sha256(r.image.subarray(size - 32, size - 4)) === X.sha256(orig.subarray(size - 32, size - 4)));
-  ok(L('raw BIN: 9 patch entries + new checksum word'), r.changes.length === 9 && r.checksumWord.new !== r.checksumWord.old, `${r.changes.length} changes`);
+  ok(L('raw BIN: 11 patch entries + new checksum word'), r.changes.length === 11 && r.checksumWord.new !== r.checksumWord.old, `${r.changes.length} changes`);
   ok(L('result has the expected size'), r.image.length === size, String(r.image.length));
   ok(L('original input is not modified'), X.sha256(orig) === P.originalSha256);
 

@@ -232,3 +232,25 @@ Stub = real unit: selector GET_CUR always 0xf9, SET_CUR accepted and ignored. Cl
 ## Status (2026-11-05): Workstream B (macOS USB audio + MIDI) DONE
 Image: firmware/builds/X1700FW-2026-11-05-usb-macos+usb-real-rate.BIN (patches 001+002). macOS: MAC mode, 44.1/48/96 kHz follow the mixer's
 System Setting automatically, 8 in / 8 out 24-bit, MIDI OK. Windows: PC mode with Denon driver OK. Rule: change mode or rate on the mixer, then power-cycle.
+
+## MPC One (1st gen) test (2026-11-06): not fixed, parked
+- [C] Akai MPC One, unit in MAC mode, MPC and unit both at 44.1 kHz: selecting the DN-X1700 gives "AUDIO DEVICE ERROR: Specified configuration may not be
+  supported by the device. Code: -32, Message: Broken pipe". -32 is Linux EPIPE (a USB STALL, or an ALSA xrun code).
+- [C] `tools/probe_rate_write.swift` on the real unit: SET_CUR of the current rate to clock 5 and clock 6 is accepted (no STALL), so a rate write is not the cause.
+- [C] Black Pill clone (`clone-f411/`, full-speed, stub mimicking the patched unit: rate 44100, selector pin 1, rate/selector writes accepted) reproduces the same
+  error in every variant tried: v8 (2ch/16-bit, MAC-mode synchronous endpoints), v9 (same descriptors, every class request answered instead of STALL),
+  v10 (audio function only, no IAD1/MIDI/HID).
+- [C] So stalled requests and the extra interfaces are not the cause. [H] The MPC's audio stack is stricter than macOS, or rejects something in the audio
+  descriptors / clock topology (selector, UAC2 itself). Other class-compliant UAC2 devices report similar errors on MPCs (forum reports, anecdotal).
+- [open] Next if resumed: a minimal clone (stereo, 16-bit, one clock source, no selector) and add features back until the MPC objects.
+  If even that fails, treat it as an Akai-side limitation.
+
+## Linux / MPC One: root cause found (2026-11-06)
+- [C] Debian 12 (kernel 6.1) in a QEMU VM with the real unit passed through (MAC mode, 44.1 kHz): the device enumerates, but opening the stream fails:
+  `aplay -D hw:0,0 -f S24_3LE -c 8 -r 44100` -> "Unable to install hw params"; `snd-usb-audio` debug log: `enable PITCH for EP 0x1` then `failed to enable PITCH for EP 0x1`
+  (same for 0x85), endpoint closed. This is the same failure as the MPC One's "-32 Broken pipe" (EPIPE = the STALLed request).
+- [C] Cause (kernel `sound/usb/stream.c`): for UAC2 the pitch-control bit is taken from the CS isochronous endpoint descriptor's bmControls (`& 0x03`).
+  The unit's descriptors have bmControls = 0x15, so Linux thinks a pitch control exists, SETs it, the firmware STALLs it, and prepare fails.
+- [C] Fix (patch 003, flashed 2026-11-06, X1700 real unit): bmControls 0x15 -> 0x14 in both CS endpoint descriptors (cfg+0xa9, +0xe0 = flash 0xD3749 / 0xD3780 on the X1700; X1600 0xCB191 / 0xCB1C8).
+  Result: Akai MPC One opens the stream and plays audio; macOS + Ableton unaffected. Windows PC mode not re-checked. The MPC still shows "disk streaming isn't keeping up" on loading an existing project (MPC storage side, probably unrelated). X1600/X600 carry the patch untested.
+- [C] Do NOT use QEMU USB passthrough on this Mac: running `sudo qemu ... -device usb-host` for the unit (and a re-plug) caused a macOS kernel panic in IOUSBHostFamily.

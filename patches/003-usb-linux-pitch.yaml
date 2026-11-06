@@ -1,0 +1,20 @@
+name: usb-linux-pitch
+description: >
+  Make Linux (snd-usb-audio, Akai MPC One) able to open the audio stream: drop the endpoint pitch-control claim.
+  Evidence: docs/usb.md 'Linux / MPC One: root cause found'.
+status: "flashed on the real X1700 (2026-11-06): Akai MPC One now opens the stream and plays; macOS + Ableton still fine. Windows not re-checked"
+patches:
+  - offset: 0xd3749
+    expect: "15"
+    new: "14"
+    reason: >
+      CS isochronous endpoint (playback, EP 0x01) bmControls 0x15 -> 0x14. Bits 0-1 = 01 claim a pitch control. Linux snd-usb-audio takes the pitch bit from
+      here for UAC2, sends SET_CUR 'enable PITCH' to the endpoint, the firmware STALLs it, and the stream cannot be opened (aplay: 'Unable to install
+      hw params'; Akai MPC One: 'Broken pipe -32'). 0x14 keeps the other two (overrun/underrun) fields as they were and drops the pitch claim.
+  - offset: 0xd3780
+    expect: "15"
+    new: "14"
+    reason: >
+      CS isochronous endpoint (record, EP 0x85) bmControls 0x15 -> 0x14. Bits 0-1 = 01 claim a pitch control. Linux snd-usb-audio takes the pitch bit from
+      here for UAC2, sends SET_CUR 'enable PITCH' to the endpoint, the firmware STALLs it, and the stream cannot be opened (aplay: 'Unable to install
+      hw params'; Akai MPC One: 'Broken pipe -32'). 0x14 keeps the other two (overrun/underrun) fields as they were and drops the pitch claim.

@@ -7,10 +7,11 @@ globalThis.X600_PATCHES = {
  "version": "v1.030",
  "untested": true,
  "originalSha256": "d58c122694f03493a7fe7da0ddbc77d63e67a317978d6e42285fff861037b5d8",
- "resultSha256": "c2fe1bd2896a073e854339073eeddb00307ea2cad84b766394c9c61cf106faa5",
+ "resultSha256": "0c79bb2b488153c5baa117c9fc6e4fd347582291de8e3f793118ec9d4afd58cb",
  "patchSets": [
   "001-usb-macos",
-  "002-usb-real-rate"
+  "002-usb-real-rate",
+  "003-usb-linux-pitch"
  ],
  "patches": [
   {
@@ -75,6 +76,20 @@ globalThis.X600_PATCHES = {
    "expect": "6465207375207269207469206c72206c77203f7620637220616420646120616d20616620766120766220766320766420666d206473206664206274206c62206163206263207a61207a62207a63207a64207a65207a66207a67207a68207a69207a6a207a6b207a6c207a6e207a6d207a6f207a70207a71207a72207a73207562206b62206d67206d652072702073742073722073",
    "new": "847488058b02d215a011e104a001e504e50ed110410b0009d2148800890288018900d2136153605388048b007202d00a402b0009d107410b000988008902d40aa0010009d40bd006400be5016203d105412b00090c01a8780c02b0240c0ad95f0c02b1560c02b07a0c0adacd0c0ac6c80c0ac6d60c0ac6c8010080bb000080bb0000000000000100007701000077010000000000",
    "reason": "caves 1-3 over the lowercase serial-command table (service UART only)"
+  },
+  {
+   "patch": "003-usb-linux-pitch",
+   "offset": 777077,
+   "expect": "15",
+   "new": "14",
+   "reason": "CS isochronous endpoint (playback, EP 0x01) bmControls 0x15 -> 0x14. Bits 0-1 = 01 claim a pitch control. Linux snd-usb-audio takes the pitch bit from here for UAC2, sends SET_CUR 'enable PITCH' to the endpoint, the firmware STALLs it, and the stream cannot be opened (aplay: 'Unable to install hw params'; Akai MPC One: 'Broken pipe -32'). 0x14 keeps the other two (overrun/underrun) fields as they were and drops the pitch claim."
+  },
+  {
+   "patch": "003-usb-linux-pitch",
+   "offset": 777132,
+   "expect": "15",
+   "new": "14",
+   "reason": "CS isochronous endpoint (record, EP 0x85) bmControls 0x15 -> 0x14. Bits 0-1 = 01 claim a pitch control. Linux snd-usb-audio takes the pitch bit from here for UAC2, sends SET_CUR 'enable PITCH' to the endpoint, the firmware STALLs it, and the stream cannot be opened (aplay: 'Unable to install hw params'; Akai MPC One: 'Broken pipe -32'). 0x14 keeps the other two (overrun/underrun) fields as they were and drops the pitch claim."
   }
  ]
 };
