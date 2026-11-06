@@ -82,6 +82,10 @@
   .btn.secondary { background:transparent; color:var(--accent-strong); }
   .btn.secondary:hover { background:var(--accent-soft); }
   .wfcard { margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:14px 16px; background:var(--surface); }
+  .wfopt { display:flex; gap:10px; align-items:flex-start; margin:8px 0 0; padding:10px 12px; border-radius:10px; border:1px solid var(--ok-line); background:var(--ok-bg); cursor:pointer; }
+  .wfopt.sel { outline:2px solid var(--ok); }
+  .wfopt.na { border-color:var(--line); background:var(--surface-2); color:var(--muted); cursor:not-allowed; }
+  .wfopt input { margin-top:5px; }
   .callout.bad { background:var(--danger-bg); border-color:var(--danger-line); }
   .btn[disabled] { opacity:.45; cursor:not-allowed; } .btn[disabled]:hover { background:var(--accent); }
   .btn.big { padding:15px 26px; font-size:1.05rem; }
@@ -278,12 +282,11 @@
             <li><div>Mixer <strong>off</strong>, USB cable to the computer, then hold <kbd>DUCKING</kbd> and <kbd>SELECT</kbd> and switch on until the display shows <strong>UP</strong>.</div></li>
             <li><div><button class="btn" id="wfconnect" type="button">Connect to the mixer</button> and pick the Denon device in the browser's list. <span class="hint" id="wfdev"></span></div></li>
             <li><div><strong>Firmware file</strong>
-              <div class="callout" id="wffile">No file yet. Add Denon's firmware in step 2 (it is picked up here automatically as the patched version), or choose a file here.</div>
-              <div class="wf-row"><button class="btn" id="wfpick" type="button">Choose a firmware file</button>
-                <button class="link-btn" id="wfusepatched" type="button" hidden>use the patched firmware from step 3</button></div>
+              <div class="callout" id="wffile">No file yet. Add Denon's firmware in step 2, or choose a file here.</div>
+              <div class="wf-row"><button class="btn" id="wfpick" type="button">Choose a firmware file</button></div>
               <input id="wffileinput" type="file" hidden accept=".zip,.bin,.BIN">
-              <p class="hint">Accepts Denon's original (the zip as downloaded, or <code>X600FW.BIN</code>) or the patched file from this page. Anything else is refused.
-                <strong>First time? Send Denon's original first</strong>: it changes nothing if everything works.</p></div></li>
+              <p class="hint">Once Denon's file is loaded (in step 2, or with the button above: the zip as downloaded, or <code>X600FW.BIN</code>) you get both versions to choose from.
+                An already-patched file from this page is accepted too. Anything else is refused. <strong>First time? Send Denon's original first</strong>: it changes nothing if everything works.</p></div></li>
             <li><div><label class="ack"><input type="checkbox" id="wfack"> <span>I understand this has not been tested on a real DN-X600, that a power or cable loss during Execute can leave the mixer unable to start, and that I alone am responsible.</span></label></div></li>
             <li><div class="wf-row"><button class="btn big" id="wfgo" type="button" disabled>Start</button>
               <label><input type="checkbox" id="wfdry"> dry run (send nothing)</label>
@@ -432,29 +435,41 @@
   (function () {
     const WF = window.DNFLASH;
     if (!navigator.hid || !WF) { $('wfno').hidden = false; $('wfui').hidden = true; wfUpdate = () => {}; return; }
-    let dev = null, running = false, stop = false, img = null, kind = null, fromStep = false;
+    let dev = null, running = false, stop = false, fromStep = false;
+    let opts = { original: null, patched: null }, choice = null, bad = null, img = null, kind = null;
     const log = (m) => { const t = $('wflog'); t.value += m + '\n'; t.scrollTop = t.scrollHeight; };
     const refresh = () => { $('wfgo').disabled = running || !img || !$('wfack').checked || (!dev && !$('wfdry').checked); };
-    const show = (cls, html) => { const b = $('wffile'); b.className = 'callout ' + cls; b.innerHTML = html; };
-    function setImage(bytes) {                      // identified by hash: "verified" = exactly Denon's original or exactly our patched build
+    const sync = () => { kind = choice && opts[choice] ? choice : null; img = kind ? opts[kind] : null; refresh(); };
+    function render() {                             // shows what the loaded file gives: original and/or patched, each green when verified
+      const box = $('wffile');
+      if (bad) { box.className = 'callout bad'; box.innerHTML = bad; sync(); return; }
+      if (!opts.original && !opts.patched) { box.className = 'callout'; box.textContent = 'No file yet. Add Denon\'s firmware in step 2, or choose a file here.'; sync(); return; }
+      box.className = 'callout';
+      const row = (k, title, desc, na) => '<label class="wfopt ' + (na ? 'na' : 'ok') + (choice === k ? ' sel' : '') + '"><input type="radio" name="wfsrc" value="' + k + '"' + (choice === k ? ' checked' : '') + (na ? ' disabled' : '') + '> <span><strong>' + title + '</strong> ' + desc + '</span></label>';
+      box.innerHTML = '<span class="hint">Pick what to send:</span>' +
+        row('original', 'Original firmware' + (opts.original ? ' &#10003;' : ''), opts.original ? 'Denon DN-X600 ' + esc(P.version) + ', verified. Changes nothing: a good first test.' : 'not available (add Denon\'s zip or <code>X600FW.BIN</code> to get it).', !opts.original) +
+        row('patched', 'Patched firmware' + (opts.patched ? ' &#10003;' : ''), opts.patched ? 'verified. This is the Mac USB fix.' : 'not available.', !opts.patched);
+      sync();
+    }
+    function load(bytes) {                          // identified by hash: "verified" = exactly Denon's original or exactly our patched build
       const sha = X1700.sha256(bytes);
-      img = null; kind = null;
-      if (sha === P.originalSha256) { img = bytes; kind = 'original'; show('ok', '<strong>Original firmware &#10003;</strong> Denon DN-X600 ' + esc(P.version) + ', verified (sha256 ' + sha.slice(0, 12) + '...). Sending this changes nothing.'); }
-      else if (sha === P.resultSha256) { img = bytes; kind = 'patched'; show('ok', '<strong>Patched firmware &#10003;</strong> verified (sha256 ' + sha.slice(0, 12) + '...). This is the Mac USB fix.'); }
-      else show('bad', '<strong>Not recognised.</strong> This is neither Denon\'s original DN-X600 ' + esc(P.version) + ' firmware nor the patched file from this page, so it will not be sent.');
-      $('wfusepatched').hidden = !(patched && kind !== 'patched');
-      refresh();
+      bad = null;
+      if (sha === P.originalSha256) { opts = { original: bytes, patched: X1700.buildImage(bytes, P).image }; choice = 'patched'; }
+      else if (sha === P.resultSha256) { opts = { original: null, patched: bytes }; choice = 'patched'; }
+      else { opts = { original: null, patched: null }; choice = null; bad = '<strong>Not recognised.</strong> This is neither Denon\'s original DN-X600 ' + esc(P.version) + ' firmware nor the patched file from this page, so it will not be sent.'; }
+      render();
     }
     wfUpdate = () => {                              // called when step 2 accepts a file, or is cleared
-      if (patched) { fromStep = true; setImage(patched.image); }
-      else if (fromStep) { fromStep = false; img = null; kind = null; show('', 'No file yet. Add Denon\'s firmware in step 2 (it is picked up here automatically as the patched version), or choose a file here.'); $('wfusepatched').hidden = true; refresh(); }
+      if (patched && origFw) { fromStep = true; bad = null; opts = { original: origFw, patched: patched.image }; choice = choice || 'patched'; render(); }
+      else if (fromStep) { fromStep = false; opts = { original: null, patched: null }; choice = null; bad = null; render(); }
     };
+    $('wffile').addEventListener('change', (e) => { if (e.target && e.target.name === 'wfsrc') { choice = e.target.value; render(); } });
     $('wfpick').addEventListener('click', () => $('wffileinput').click());
-    $('wfusepatched').addEventListener('click', () => { if (patched) { fromStep = true; setImage(patched.image); } });
     $('wffileinput').addEventListener('change', async () => {
       const f = $('wffileinput').files[0]; if (!f) return;
-      try { const bytes = await X1700.loadFirmware(new Uint8Array(await f.arrayBuffer()), P.fwName); fromStep = false; setImage(bytes); }
-      catch (e) { img = null; kind = null; show('bad', '<strong>This file can\'t be used.</strong> ' + esc(e.message)); refresh(); }
+      fromStep = false;
+      try { load(await X1700.loadFirmware(new Uint8Array(await f.arrayBuffer()), P.fwName)); }
+      catch (e) { opts = { original: null, patched: null }; choice = null; bad = '<strong>This file can\'t be used.</strong> ' + esc(e.message); render(); }
       $('wffileinput').value = '';
     });
     ['wfack', 'wfdry'].forEach((i) => $(i).addEventListener('change', refresh));
