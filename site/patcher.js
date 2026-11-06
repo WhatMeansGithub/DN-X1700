@@ -1,4 +1,4 @@
-// DN-X1700 firmware patcher: core logic. Runs in the browser and in Node. Nothing is ever uploaded.
+// DN-X1700 / DN-X1600 firmware patcher: core logic. Runs in the browser and in Node. Nothing is ever uploaded.
 // Mirrors tools/build.py: verify the original byte for byte, apply the patches, fix the updater checksum, verify the result.
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -6,7 +6,9 @@
 })(typeof self !== 'undefined' ? self : globalThis, function () {
   'use strict';
 
-  const SIZE = 0x400000;          // the image is exactly 4 MiB
+  const SIZE = 0x400000;          // X1700 image: exactly 4 MiB. Patch data for another model sets P.size / P.fwName.
+  const sizeOf = (P) => (P && P.size) || SIZE;
+  const nameOf = (P) => (P && P.fwName) || 'X1700FW.BIN';
   const BOOT_END = 0x10000;       // never patch the boot area
   const TARGET = 0xFFFFFFFF;      // updater rule: little-endian 32-bit word sum of the whole image
 
@@ -63,16 +65,17 @@
   const fromHex = (s) => Uint8Array.from(s.match(/../g) || [], (x) => parseInt(x, 16));
   const toHex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
 
-  // ---- ZIP: find X1700FW.BIN in the zip Denon provides (stored or deflate) ----
+  // ---- ZIP: find the firmware file (X1700FW.BIN, X1600FW.BIN) in the zip Denon provides (stored or deflate) ----
   let inflateRaw = async function (data) {
     if (typeof DecompressionStream === 'undefined')
-      throw new UserError('This browser cannot unzip files. Unzip the download yourself and drop X1700FW.BIN instead.');
+      throw new UserError('This browser cannot unzip files. Unzip the download yourself and drop the .BIN file inside instead.');
     const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
     return new Uint8Array(await new Response(stream).arrayBuffer());
   };
   function setInflate(fn) { inflateRaw = fn; }       // lets tests supply zlib
 
-  async function extractFromZip(b) {
+  async function extractFromZip(b, fwName = 'X1700FW.BIN') {
+    const want = new RegExp('(^|[\\\\/])' + fwName.replace('.', '\\.') + '$', 'i');
     const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
     let eocd = -1;
     for (let i = b.length - 22; i >= Math.max(0, b.length - 65557); i--)
@@ -87,27 +90,28 @@
       const lho = dv.getUint32(p + 42, true);
       const name = new TextDecoder().decode(b.subarray(p + 46, p + 46 + nlen));
       p += 46 + nlen + elen + clen;
-      if (!/(^|[\\/])X1700FW\.BIN$/i.test(name)) continue;
+      if (!want.test(name)) continue;
       const start = lho + 30 + dv.getUint16(lho + 26, true) + dv.getUint16(lho + 28, true);
       const data = b.subarray(start, start + csize);
       const out = method === 0 ? data : method === 8 ? await inflateRaw(data) : null;
-      if (!out) throw new UserError('The zip uses a compression method this tool does not support. Unzip it and drop X1700FW.BIN.');
+      if (!out) throw new UserError('The zip uses a compression method this tool does not support. Unzip it and drop ' + fwName + '.');
       if (out.length !== usize) throw new UserError('The zip file is damaged (size mismatch).');
       return out;
     }
-    throw new UserError('That zip does not contain X1700FW.BIN. Download the firmware from Denon\'s page (link above).');
+    throw new UserError('That zip does not contain ' + fwName + '. Download the firmware from Denon\'s page (link above).');
   }
 
-  // Accepts the Denon zip or the raw X1700FW.BIN; returns the 4 MiB image bytes.
-  async function loadFirmware(bytes) {
-    if (bytes.length > 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 3 && bytes[3] === 4) return extractFromZip(bytes);
+  // Accepts the Denon zip or the raw firmware file; returns the image bytes. fwName defaults to X1700FW.BIN.
+  async function loadFirmware(bytes, fwName) {
+    if (bytes.length > 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 3 && bytes[3] === 4) return extractFromZip(bytes, fwName);
     return bytes;
   }
 
   // ---- the patcher: same steps and checks as tools/build.py ----
   function buildImage(orig, P) {
+    const SIZE = sizeOf(P);
     if (orig.length !== SIZE)
-      throw new UserError(`That file is ${orig.length.toLocaleString('en-US')} bytes. The firmware must be exactly 4,194,304 bytes (X1700FW.BIN from Denon's v2.000 download).`);
+      throw new UserError(`That file is ${orig.length.toLocaleString('en-US')} bytes. The firmware must be exactly ${SIZE.toLocaleString('en-US')} bytes (${nameOf(P)} from Denon's v2.000 download).`);
     const origSha = sha256(orig);
     if (origSha !== P.originalSha256)
       throw new UserError('This is not the original Denon v2.000 firmware, so it will not be patched. ' +

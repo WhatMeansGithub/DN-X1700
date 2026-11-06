@@ -32,15 +32,23 @@ jobs:
           mkdir -p firmware/original
           unzip -o -j fw.zip X1700FW.BIN -d firmware/original
           echo "24ef3d26a116118d27787c337a8a89d67cb6b314cca38f6f22d906b3785556f3  firmware/original/X1700FW.BIN" | sha256sum -c -
+          curl -fsSL -o fw1600.zip https://cdn.inmusicbrands.com/denondj/legacy/dnx1600/firmware-dnx1600-v2000.zip
+          unzip -o -j fw1600.zip X1600FW.BIN -d firmware/original
+          echo "befd35c43411b39e796656f12aa850badee49d677522ce5f7a5db504e346c120  firmware/original/X1600FW.BIN" | sha256sum -c -
       - run: pip install -r requirements.txt
       - name: Web tool data matches the patch files
         run: |
           python tools/gen_site_data.py
-          git diff --exit-code -- site/patches.js patches/patches.json
+          git diff --exit-code -- site/patches.js site/x1600/patches.js patches/patches.json
+      - name: X1600 patch 002 regenerates identically and passes the simulator
+        run: |
+          python tools/gen_patch002.py --model X1600
+          git diff --exit-code -- patches/x1600
+          python tools/sim_patch002.py --model X1600
       - name: Program builds the reference image
         run: python tools/x1700_patcher.py --yes --file fw.zip --out out
       - name: Web patcher tests
-        run: node site/test.mjs firmware/original/X1700FW.BIN
+        run: node site/test.mjs firmware/original/X1700FW.BIN firmware/original/X1600FW.BIN
 
   deploy:
     needs: verify
@@ -52,8 +60,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Publish only the page files
         run: |
-          mkdir _site
+          mkdir -p _site/x1600
           cp site/index.html site/patcher.js site/patches.js _site/
+          cp site/x1600/index.html site/x1600/patches.js _site/x1600/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

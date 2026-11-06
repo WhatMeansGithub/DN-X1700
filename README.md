@@ -3,6 +3,12 @@
 Firmware patches for the **Denon DJ DN-X1700** mixer (system software v2.000) that make its USB audio and MIDI work with the
 built-in class driver in current macOS, with no vendor driver: 8 in / 8 out, 24-bit, at 44.1, 48 or 96 kHz.
 
+> **DN-X1600 owners:** an **experimental** port of the same fix is at
+> **https://whatmeansgithub.github.io/DN-X1700/x1600/**. It has **not been tested on a real DN-X1600 yet**. The DN-X1600
+> firmware is built from the same code (identical USB descriptor, same faulty sample-rate code, same updater), and it passed
+> the same checks as the working DN-X1700 image, so it should work in theory. No guarantees. Details: [docs/x1600.md](docs/x1600.md).
+> If you try it, please [open an issue](https://github.com/WhatMeansGithub/DN-X1700/issues) with the result.
+
 > **This repository contains no Denon firmware.** You download the official firmware from Denon, and a script on your own
 > computer applies the patches and builds the image. Nothing here is from, or endorsed by, Denon DJ or inMusic.
 
@@ -236,7 +242,8 @@ the whole chip from that file). This repository does not provide support for tha
 | Path | What it is |
 |---|---|
 | `patches/` | The patches as data: offset, expected original bytes, new bytes, reason |
-| `site/` | The web tool (`index.html`, `patcher.js`, generated `patches.js`) and its tests (`test.mjs`, run with Node) |
+| `site/` | The web tool (`index.html`, `patcher.js`, generated `patches.js`), the experimental DN-X1600 page (`x1600/`) and the tests for both (`test.mjs`, run with Node) |
+| `patches/x1600/`, `tools/models.py` | DN-X1600 patch data (experimental, untested on hardware) and per-model addresses; `gen_patch002.py`, `sim_patch002.py` and `build.py` take `--model X1600` |
 | `tools/x1700_patcher.py` | One-command program: downloads or loads the firmware, verifies, patches, optionally copies to the stick |
 | `tools/gen_site_data.py` | Generates the data used by the web tool and the program from `patches/*.yaml` (run it after changing a patch) |
 | `tools/build.py` | Applies patches only if the original matches byte for byte; fixes the updater checksum; writes image, diff and manifest |
