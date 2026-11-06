@@ -252,7 +252,7 @@ applies to it, including **no guarantees**.
 
 - The DN-X1600's USB descriptor is byte for byte the same as the DN-X1700's, so patch `001` applies unchanged (same three bytes).
 - The faulty sample-rate code that patch `002` fixes is the same code at different addresses, and so are the updater and its checksum
-  rule (the DN-X1600 image is 2 MiB instead of 4 MiB). Linux has carried a special case for this mixer since 2021 because
+  rule (the DN-X1600 image is 2 MiB instead of 4 MiB), and so is patch `003` (the Linux/MPC fix; same two bytes). Linux has carried a special case for this mixer since 2021 because
   "switching rates via software is currently not working", which is the same bug.
 - The patched image passed the same checks as the working DN-X1700 one: every address is verified against the original file, the
   added code runs in a simulator at 44.1, 48 and 96 kHz (12 of 12 pass), and the web tool, the build script and the tests all
