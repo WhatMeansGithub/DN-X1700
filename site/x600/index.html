@@ -81,6 +81,8 @@
   .btn svg { width:18px; height:18px; stroke:currentColor; }
   .btn.secondary { background:transparent; color:var(--accent-strong); }
   .btn.secondary:hover { background:var(--accent-soft); }
+  .wfcard { margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:14px 16px; background:var(--surface); }
+  .callout.bad { background:var(--danger-bg); border-color:var(--danger-line); }
   .btn[disabled] { opacity:.45; cursor:not-allowed; } .btn[disabled]:hover { background:var(--accent); }
   .btn.big { padding:15px 26px; font-size:1.05rem; }
   :focus-visible { outline:3px solid var(--accent); outline-offset:2px; border-radius:6px; }
@@ -270,34 +272,28 @@
         <p class="hint">Needs <strong>Chrome or Edge</strong> (Safari and Firefox can't talk to USB HID devices). No Denon software needed. This sends the file to the mixer using the same
           messages as Denon's updater, which were read out of that program but <strong>have never been run against a real DN-X600</strong>. Nothing is written to the mixer's flash until the final <em>Execute</em> step;
           you can stop before that.</p>
-        <details id="wf" style="margin-top:8px"><summary>Open the browser flasher</summary>
-          <div id="wfno" class="callout warn" hidden><strong>This browser can't do it.</strong> WebHID is missing. Open this page in Chrome or Edge, or use Option B below.</div>
-          <div id="wfui">
-            <div class="callout" id="wffilebox">
-              <strong>Firmware file</strong>
-              <span id="wffile">None yet. This flasher uses the file you add in <a href="#s2">step 2</a>: Denon's zip or <code>X600FW.BIN</code>, exactly as downloaded.
-                It makes both versions from it: Denon's original and the patched one.</span>
-              <div style="margin-top:8px"><button class="btn" id="wfpick" type="button">Choose Denon's firmware file</button></div>
-            </div>
-            <ol class="flash">
-              <li><div>Mixer <strong>off</strong>, USB cable to the computer, then hold <kbd>DUCKING</kbd> and <kbd>SELECT</kbd> and switch on until the display shows <strong>UP</strong>.</div></li>
-              <li><div><button class="btn" id="wfconnect" type="button">Connect to the mixer</button> and pick the Denon device in the browser's list. <span class="hint" id="wfdev"></span></div></li>
-              <li><div>What to send:
-                <div class="wf-row">
-                  <label><input type="radio" name="wfsrc" value="orig" checked disabled> Denon's <strong>original</strong> file (first test: changes nothing)</label>
-                  <label><input type="radio" name="wfsrc" value="patched" disabled> the <strong>patched</strong> file (made from the same file)</label>
-                  <label><input type="checkbox" id="wfdry"> dry run (send nothing)</label>
-                </div></div></li>
-              <li><div><label class="ack"><input type="checkbox" id="wfack"> <span>I understand this has not been tested on a real DN-X600, that a power or cable loss during Execute can leave the mixer unable to start, and that I alone am responsible.</span></label></div></li>
-              <li><div><button class="btn big" id="wfgo" type="button" disabled>Start</button> <button class="link-btn" id="wfstop" type="button" hidden>stop (only possible before Execute)</button></div></li>
-            </ol>
-            <div class="wf-bar" aria-hidden="true"><i id="wfbar"></i></div>
-            <p class="hint" id="wfstatus" aria-live="polite">Waiting.</p>
-            <textarea id="wflog" readonly aria-label="Log" placeholder="Log"></textarea>
-            <p class="hint"><button class="link-btn" id="wfcopy" type="button">copy log</button>. Please paste the log into your report, whatever happened.
-              Suggested order: dry run first, then the <strong>original</strong> file (proves the tool talks to your mixer correctly), then the patched file.</p>
-          </div>
-        </details>
+        <div id="wfno" class="callout warn" hidden><strong>This browser can't do it.</strong> WebHID is missing. Open this page in Chrome or Edge, or use Option B below.</div>
+        <div id="wfui" class="wfcard">
+          <ol class="flash">
+            <li><div>Mixer <strong>off</strong>, USB cable to the computer, then hold <kbd>DUCKING</kbd> and <kbd>SELECT</kbd> and switch on until the display shows <strong>UP</strong>.</div></li>
+            <li><div><button class="btn" id="wfconnect" type="button">Connect to the mixer</button> and pick the Denon device in the browser's list. <span class="hint" id="wfdev"></span></div></li>
+            <li><div><strong>Firmware file</strong>
+              <div class="callout" id="wffile">No file yet. Add Denon's firmware in step 2 (it is picked up here automatically as the patched version), or choose a file here.</div>
+              <div class="wf-row"><button class="btn" id="wfpick" type="button">Choose a firmware file</button>
+                <button class="link-btn" id="wfusepatched" type="button" hidden>use the patched firmware from step 3</button></div>
+              <input id="wffileinput" type="file" hidden accept=".zip,.bin,.BIN">
+              <p class="hint">Accepts Denon's original (the zip as downloaded, or <code>X600FW.BIN</code>) or the patched file from this page. Anything else is refused.
+                <strong>First time? Send Denon's original first</strong>: it changes nothing if everything works.</p></div></li>
+            <li><div><label class="ack"><input type="checkbox" id="wfack"> <span>I understand this has not been tested on a real DN-X600, that a power or cable loss during Execute can leave the mixer unable to start, and that I alone am responsible.</span></label></div></li>
+            <li><div class="wf-row"><button class="btn big" id="wfgo" type="button" disabled>Start</button>
+              <label><input type="checkbox" id="wfdry"> dry run (send nothing)</label>
+              <button class="link-btn" id="wfstop" type="button" hidden>stop (only possible before Execute)</button></div></li>
+          </ol>
+          <div class="wf-bar" aria-hidden="true"><i id="wfbar"></i></div>
+          <p class="hint" id="wfstatus" aria-live="polite">Waiting.</p>
+          <textarea id="wflog" readonly aria-label="Log" placeholder="Log"></textarea>
+          <p class="hint"><button class="link-btn" id="wfcopy" type="button">copy log</button>. Please paste the log into your report, whatever happened.</p>
+        </div>
         <h3 style="margin:22px 0 6px;font-size:1.02rem">Option B: Denon's DDJ Updater (Windows)</h3>
         <ol class="flash">
           <li><div>Install <strong>DDJ Updater</strong> on the Windows PC and start it. It says <strong>Waiting</strong>.</div></li>
@@ -435,24 +431,32 @@
   // ---- Option A: browser flasher (WebHID). Protocol logic lives in ../dnflash.js and is tested against a simulated mixer. ----
   (function () {
     const WF = window.DNFLASH;
-    if (!navigator.hid || !WF) { $('wfno').hidden = false; $('wfui').hidden = true; return; }
-    let dev = null, running = false, stop = false;
+    if (!navigator.hid || !WF) { $('wfno').hidden = false; $('wfui').hidden = true; wfUpdate = () => {}; return; }
+    let dev = null, running = false, stop = false, img = null, kind = null, fromStep = false;
     const log = (m) => { const t = $('wflog'); t.value += m + '\n'; t.scrollTop = t.scrollHeight; };
-    const src = () => document.querySelector('input[name=wfsrc]:checked').value;
-    const have = () => (src() === 'patched' ? !!patched : !!origFw);
-    const refresh = () => { $('wfgo').disabled = running || !have() || !$('wfack').checked || (!dev && !$('wfdry').checked); };
-    wfUpdate = () => {
-      const loaded = !!origFw && !!patched;
-      document.querySelectorAll('input[name=wfsrc]').forEach((r) => { r.disabled = !loaded; });
-      $('wfpick').hidden = loaded;
-      $('wffile').innerHTML = loaded
-        ? 'Loaded <strong>' + esc($('fname').textContent) + '</strong>: Denon\'s original (sha256 ' + esc(X1700.sha256(origFw).slice(0, 12)) + '...) and the patched version (sha256 ' + esc(patched.sha256.slice(0, 12)) + '...) are ready. Pick which one to send below. <button class="link-btn" id="wfchange" type="button">choose a different file</button>'
-        : 'None yet. This flasher uses the file you add in <a href="#s2">step 2</a>: Denon\'s zip or <code>X600FW.BIN</code>, exactly as downloaded. It makes both versions from it: Denon\'s original and the patched one.';
-      const ch = $('wfchange'); if (ch) ch.addEventListener('click', () => { reset(); input.click(); });
+    const refresh = () => { $('wfgo').disabled = running || !img || !$('wfack').checked || (!dev && !$('wfdry').checked); };
+    const show = (cls, html) => { const b = $('wffile'); b.className = 'callout ' + cls; b.innerHTML = html; };
+    function setImage(bytes) {                      // identified by hash: "verified" = exactly Denon's original or exactly our patched build
+      const sha = X1700.sha256(bytes);
+      img = null; kind = null;
+      if (sha === P.originalSha256) { img = bytes; kind = 'original'; show('ok', '<strong>Original firmware &#10003;</strong> Denon DN-X600 ' + esc(P.version) + ', verified (sha256 ' + sha.slice(0, 12) + '...). Sending this changes nothing.'); }
+      else if (sha === P.resultSha256) { img = bytes; kind = 'patched'; show('ok', '<strong>Patched firmware &#10003;</strong> verified (sha256 ' + sha.slice(0, 12) + '...). This is the Mac USB fix.'); }
+      else show('bad', '<strong>Not recognised.</strong> This is neither Denon\'s original DN-X600 ' + esc(P.version) + ' firmware nor the patched file from this page, so it will not be sent.');
+      $('wfusepatched').hidden = !(patched && kind !== 'patched');
       refresh();
+    }
+    wfUpdate = () => {                              // called when step 2 accepts a file, or is cleared
+      if (patched) { fromStep = true; setImage(patched.image); }
+      else if (fromStep) { fromStep = false; img = null; kind = null; show('', 'No file yet. Add Denon\'s firmware in step 2 (it is picked up here automatically as the patched version), or choose a file here.'); $('wfusepatched').hidden = true; refresh(); }
     };
-    $('wfpick').addEventListener('click', () => input.click());
-    document.querySelectorAll('input[name=wfsrc]').forEach((r) => r.addEventListener('change', refresh));
+    $('wfpick').addEventListener('click', () => $('wffileinput').click());
+    $('wfusepatched').addEventListener('click', () => { if (patched) { fromStep = true; setImage(patched.image); } });
+    $('wffileinput').addEventListener('change', async () => {
+      const f = $('wffileinput').files[0]; if (!f) return;
+      try { const bytes = await X1700.loadFirmware(new Uint8Array(await f.arrayBuffer()), P.fwName); fromStep = false; setImage(bytes); }
+      catch (e) { img = null; kind = null; show('bad', '<strong>This file can\'t be used.</strong> ' + esc(e.message)); refresh(); }
+      $('wffileinput').value = '';
+    });
     ['wfack', 'wfdry'].forEach((i) => $(i).addEventListener('change', refresh));
     $('wfconnect').addEventListener('click', async () => {
       try {
@@ -469,15 +473,15 @@
     $('wfcopy').addEventListener('click', async () => { try { await navigator.clipboard.writeText($('wflog').value); $('wfcopy').textContent = 'copied'; setTimeout(() => { $('wfcopy').textContent = 'copy log'; }, 1500); } catch (e) { /* ignore */ } });
     window.addEventListener('beforeunload', (e) => { if (running) { e.preventDefault(); e.returnValue = ''; } });
     $('wfgo').addEventListener('click', async () => {
-      const image = src() === 'patched' ? (patched && patched.image) : origFw;
-      if (!image) { $('wfstatus').textContent = 'Choose Denon\'s firmware file first (the button at the top of this box).'; return; }
+      const image = img;
+      if (!image) { $('wfstatus').textContent = 'Choose a firmware file first.'; return; }
       try {
         if (!X1700.integrityOk(image, P)) throw new Error('The file fails its CRC check.');
         WF.checkImage(image, { name: 'DN-X600', pid: 0x500F, size: P.size });
       } catch (e) { $('wfstatus').textContent = 'Not sending: ' + e.message; log('Not sending: ' + e.message); return; }
       const dry = $('wfdry').checked;
       running = true; stop = false; $('wfstop').hidden = false; refresh(); $('wflog').value = '';
-      log((dry ? 'DRY RUN. ' : '') + 'Sending the ' + src() + ' file (' + image.length + ' bytes, sha256 ' + X1700.sha256(image).slice(0, 16) + '...)');
+      log((dry ? 'DRY RUN. ' : '') + 'Sending the ' + kind + ' firmware (' + image.length + ' bytes, sha256 ' + X1700.sha256(image).slice(0, 16) + '...)');
       const link = dry ? new WF.DryLink() : new WF.Link(dev, log);
       try {
         await WF.flash({ link, image, log, aborted: () => stop,
@@ -486,7 +490,7 @@
       } catch (e) { log('ERROR: ' + e.message); $('wfstatus').textContent = 'Stopped: ' + e.message; }
       finally { link.close(); running = false; $('wfstop').hidden = true; refresh(); }
     });
-    wfUpdate();
+    refresh();
   })();
   setSteps('waiting');
 })();

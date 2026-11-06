@@ -50,15 +50,17 @@ Flashing Denon's own original file is the same as a normal firmware update; it r
 
 Open <https://whatmeansgithub.github.io/DN-X1700/x600/> in **Chrome or Edge** (Safari and Firefox can't talk to USB HID devices). This works on Windows and on a Mac.
 
-1. **Steps 1 and 2 on that page:** download Denon's zip (link on the page) and drop it on the page (or click the box and choose it). That is the only place a file is chosen: the page checks it and builds the patched version from it in your browser (nothing is uploaded). The flasher in step 4 then shows "Loaded ..." and offers both the original and the patched version of that same file.
-2. Scroll to step 4 and open **"Option A: flash straight from this page"**.
+1. **Steps 1 and 2 on that page:** download Denon's zip (link on the page) and drop it on the page. The page checks it and builds the patched version in your browser (nothing is uploaded).
+2. Scroll to step 4, **Option A: flash straight from this page**. The **Firmware file** box shows what will be sent, in green once verified: **Patched firmware ✓** (picked up automatically from step 2),
+   or **Original firmware ✓** if you choose Denon's zip / `X600FW.BIN` with the **Choose a firmware file** button there. Any other file shows red and can't be sent.
 3. **Dry run first.** Tick *dry run*, tick the acknowledgement, press **Start**. Nothing is sent to the mixer. Copy the log with *copy log* and keep it.
 4. Put the mixer in update mode (hold **DUCKING + SELECT** while powering on, display shows **UP**), connect the USB cable, press **Connect to the mixer** and pick the Denon device in the browser's list.
    Copy what the page prints ("Connected: ...") into your report. If no device is listed, tell us what Device Manager (Windows) or System Information > USB (Mac) shows.
-5. **Send Denon's original file first:** choose *original*, untick *dry run*, tick the acknowledgement, press **Start**. If the tool talks to your mixer correctly this changes nothing
-   (it is the same file Denon's updater sends). You can press **stop** at any time before it says "Executing". Watch for **donE** on the mixer, then switch it off and on.
-6. Only if step 5 worked: choose *patched* and repeat. Then set the mixer to **Mac OS** mode: unplug USB, hold **EFX CUE** and press **BEAT ◀ ▶** to enter the OS setting mode,
-   choose Mac OS, press **TAP**, **power-cycle the mixer**, and connect it to the Mac. Check Audio MIDI Setup (should show 8 in / 8 out) and test playback, recording and MIDI.
+5. **Send Denon's original file first:** choose Denon's zip with **Choose a firmware file** (it must say *Original firmware ✓*), untick *dry run*, tick the acknowledgement, press **Start**.
+   If the tool talks to your mixer correctly this changes nothing (it is the same file Denon's updater sends). You can press **stop** at any time before it says "Executing".
+   Watch for **donE** on the mixer, then switch it off and on.
+6. Only if step 5 worked: click **use the patched firmware from step 3** (it must say *Patched firmware ✓*) and repeat. Then set the mixer to **Mac OS** mode: unplug USB, hold **EFX CUE** and press **BEAT ◀ ▶**
+   to enter the OS setting mode, choose Mac OS, press **TAP**, **power-cycle the mixer**, and connect it to the Mac. Check Audio MIDI Setup (should show 8 in / 8 out) and test playback, recording and MIDI.
 
 If anything fails, copy the log text. A failure before "Executing" is harmless: the mixer has not been told to write anything, so switch it off and on again and it is as before.
 
