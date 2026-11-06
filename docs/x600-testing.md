@@ -1,77 +1,90 @@
-# DN-X600: how to test (and how to capture USB packets)
+# Testing the DN-X600 firmware fix
 
-Thank you for testing. Nobody has flashed this on a real DN-X600 yet, so every report is valuable, including "it didn't work".
-This page has two jobs: **(1)** record what Denon's own updater sends, so the browser flasher can be checked against it, and **(2)** try the browser flasher.
-Do them in this order. Part 1 only uses Denon's own updater with Denon's own, unmodified file.
+Thanks for offering to test this. Nobody has tried it on a real DN-X600 yet, so every result helps, including "it didn't work".
 
-**What you need:** a Windows PC (Part 1 needs Windows), the DN-X600 with its USB cable, Chrome or Edge, and about an hour.
-A Mac also works for Part 2. Background and technical details: [x600.md](x600.md).
+**What this is:** a small firmware change that should make the DN-X600's USB audio and MIDI work with current macOS. It also comes with a web page that can flash the mixer from
+Chrome or Edge on a Mac or Windows PC, because Denon's own updater no longer runs on modern macOS. That web flasher is brand new and has only been tested against a simulation, which is why
+we want to compare it with Denon's real updater first.
 
-> **Risk, honestly:** flashing firmware can leave a mixer unable to start if power or the cable is lost while it writes. Only the last step
-> (Execute) writes to the flash. If you'd rather not flash anything, Part 2 can be done as a **dry run** that sends nothing, and
-> a failure before the "Executing" message is harmless.
+**What you need:** the DN-X600 and its USB cable, a Windows PC with Chrome or Edge, and about an hour. A Mac helps for the last step but isn't required.
 
-## Part 1: capture what Denon's updater sends (Windows)
+## Please read first
+- Flashing firmware always carries a small risk: if power or the USB cable is lost *while the mixer is writing its flash*, it may not start again, and the only fix is an external flash programmer.
+  Use stable power and don't touch the cable or the switch during the write. Your mixer's settings will be reset.
+- The tool sends the file first and only then tells the mixer to write. Stopping *before* the "Executing" message should be harmless (that's what the design suggests; it isn't proven yet).
+- **You do the steps in order. The patched firmware comes last, and only if the earlier steps worked.**
 
-### 1. Install the tools
-1. Download Wireshark for Windows from <https://www.wireshark.org/download.html> and run the installer.
-2. When the installer lists optional components, make sure **USBPcap** is ticked. (It installs a small capture driver. If Windows asks to restart afterwards, restart.)
-3. Download Denon's X600 firmware package and unzip it somewhere you can find it. It contains `DDJUpdater-2.0.msi` (the updater) and `X600FW.BIN` (the firmware):
-   <https://cdn.inmusicbrands.com/denondj/legacy/dnx600/firmware-dnx600-v1030.zip>. Install DDJ Updater from the `.msi`.
+## The plan
+1. **Capture** what Denon's own updater sends (Windows only). This is the most valuable part.
+2. **Dry run** the web flasher (sends nothing to the mixer).
+3. Flash Denon's **original** firmware with the web flasher. If it works, nothing about the mixer changes.
+4. Flash the **patched** firmware, then try it with a Mac (or at least check it still works on Windows).
 
-### 2. Put the mixer in update mode and find it
-1. Mixer **off**, USB cable connected to the PC.
-2. Hold **DUCKING** and **SELECT**, switch the mixer **on**, release when the display shows **UP** (the USB indicator is blue).
-   If Windows offers to install a driver from the unit, let it.
-3. Optional but very useful: open **Device Manager**, find the new device (look under "Human Interface Devices", "Universal Serial Bus devices" or "Other devices"),
-   right-click > **Properties** > **Details** > **Hardware Ids**, and copy the lines (they look like `USB\VID_154E&PID_xxxx`). Put them in your report.
+---
 
-### 3. Start the capture
-1. Start **Wireshark** (right-click > Run as administrator if no USBPcap interfaces appear).
-2. You will see interfaces named **USBPcap1**, **USBPcap2**, ... (one per USB root hub). The mixer is on only one of them. Click the small **gear icon** (capture options) next to each one:
-   it shows a tree of the devices attached to that hub. Use the one that contains the mixer (a Denon / inMusic or "DN-X600" entry).
-3. In that window, **untick "Capture from all devices connected to this root hub"** and tick **only the mixer**, and untick "Capture from newly connected devices".
-   This keeps your keyboard and mouse out of the file, which matters for your privacy.
-4. Click **Start** to begin capturing. If nothing at all appears once the updater runs, you picked the wrong hub: stop and try the next one.
+## 1. Capture Denon's updater (Windows)
 
-### 4. Run Denon's updater exactly as Denon describes
-1. Start **DDJ Updater**. It says "Waiting".
-2. Drag `X600FW.BIN` (the **original** file from Denon's zip) into the window. Click **Load**, then **OK**. Wait for it to finish.
-3. Click **Execute** and wait until the mixer's display says **donE**. **Do not unplug anything or switch the mixer off while it runs.**
-4. Switch the mixer off and on again. It should start normally.
+**Install**
+1. Install **Wireshark** from <https://www.wireshark.org/download.html>. In the installer, make sure **USBPcap** is ticked. Restart Windows if it asks.
+2. Download Denon's firmware package and unzip it: <https://cdn.inmusicbrands.com/denondj/legacy/dnx600/firmware-dnx600-v1030.zip>. Install **DDJ Updater** from the `.msi` inside.
 
-Flashing Denon's own original file is the same as a normal firmware update; it resets the mixer's settings.
+**Put the mixer in update mode**
+1. Mixer off, USB cable connected to the PC.
+2. Hold **DUCKING** and **SELECT**, switch the mixer on, and release when the display shows **UP**. If Windows offers to install a driver from the unit, let it.
+3. Open **Device Manager**, find the new device (try "Human Interface Devices", "Universal Serial Bus devices" or "Other devices"), right-click > **Properties** > **Details** > **Hardware Ids**,
+   and copy the text. It looks like `USB\VID_154E&PID_xxxx`. Keep it for your report.
 
-### 5. Save and send the capture
-1. In Wireshark, click the red **Stop** button, then **File > Save As...** and save as `x600-ddj-updater.pcapng`.
-2. The file may be tens of MB. Zip it and share the zip through any file-sharing service (Google Drive, Dropbox, WeTransfer ...), then put the link in your report.
+**Capture while updating**
+1. Open **Wireshark** (as administrator if no USBPcap interfaces show). You'll see **USBPcap1**, **USBPcap2**, ... (one per USB hub). Click the small **gear icon** next to each to see which devices it holds;
+   pick the one that contains the mixer.
+2. In that window, untick "Capture from all devices connected to this root hub" and tick **only the mixer**. (This keeps your keyboard and mouse out of the file.) Click **Start**.
+3. Open **DDJ Updater** (it says "Waiting"). Drag in `X600FW.BIN` from Denon's zip, click **Load**, then **OK**.
+4. Click **Execute** and wait until the mixer shows **donE**. **Don't unplug or switch anything off while it runs.**
+5. In Wireshark click the red **Stop** button, then **File > Save As...** and save `x600-ddj-updater.pcapng`. Zip it and share it through Google Drive, Dropbox, WeTransfer or similar (it may be tens of MB).
+6. Switch the mixer off and on again. It should start normally.
 
-## Part 2: try the browser flasher
+If nothing appears in Wireshark while the updater runs, you picked the wrong hub: try the next one.
 
-Open <https://whatmeansgithub.github.io/DN-X1700/x600/> in **Chrome or Edge** (Safari and Firefox can't talk to USB HID devices). This works on Windows and on a Mac.
+## 2. Dry run of the web flasher
 
-1. **Steps 1 and 2 on that page:** download Denon's zip (link on the page) and drop it on the page. The page checks it and builds the patched version in your browser (nothing is uploaded).
-2. Scroll to step 4, **Option A: flash straight from this page**. Once Denon's file is loaded, the **Firmware file** box shows two green, verified choices: **Original firmware ✓** and **Patched firmware ✓**.
-   Tick the one you want to send. (You can also load Denon's zip / `X600FW.BIN` with the **Choose a firmware file** button there. Any other file shows red and can't be sent.)
-3. **Dry run first.** Tick *dry run*, tick the acknowledgement, press **Start**. Nothing is sent to the mixer. Copy the log with *copy log* and keep it.
-4. Put the mixer in update mode (hold **DUCKING + SELECT** while powering on, display shows **UP**), connect the USB cable, press **Connect to the mixer** and pick the Denon device in the browser's list.
-   Copy what the page prints ("Connected: ...") into your report. If no device is listed, tell us what Device Manager (Windows) or System Information > USB (Mac) shows.
-5. **Send Denon's original file first:** tick **Original firmware ✓**, untick *dry run*, tick the acknowledgement, press **Start**.
-   If the tool talks to your mixer correctly this changes nothing (it is the same file Denon's updater sends). You can press **stop** at any time before it says "Executing".
-   Watch for **donE** on the mixer, then switch it off and on.
-6. Only if step 5 worked: tick **Patched firmware ✓** and repeat. Then set the mixer to **Mac OS** mode: unplug USB, hold **EFX CUE** and press **BEAT ◀ ▶**
-   to enter the OS setting mode, choose Mac OS, press **TAP**, **power-cycle the mixer**, and connect it to the Mac. Check Audio MIDI Setup (should show 8 in / 8 out) and test playback, recording and MIDI.
+Open <https://whatmeansgithub.github.io/DN-X1700/x600/> in **Chrome or Edge** (not Safari or Firefox). Nothing is uploaded; everything happens in your browser.
 
-If anything fails, copy the log text. A failure before "Executing" is harmless: the mixer has not been told to write anything, so switch it off and on again and it is as before.
+1. **Step 1:** download Denon's zip with the button (you already have it from part 1). **Step 2:** drop the zip onto the page.
+2. Scroll to step 4, **Option A: flash straight from this page**. The **Firmware file** box now shows two green choices, **Original firmware ✓** and **Patched firmware ✓**.
+3. Tick the acknowledgement and **dry run (send nothing)**, then press **Start**. It runs through the whole sequence without touching the mixer. Press **copy log** and save the text.
 
-## What to report
+## 3. Flash Denon's original firmware with the web flasher
 
-[Open an issue on GitHub](https://github.com/WhatMeansGithub/DN-X1700/issues) (or reply in the Engine DJ community thread) with:
-- Your Windows and Chrome/Edge versions, or Mac model, macOS and Chrome/Edge version.
-- Part 1: the link to the `.pcapng` zip, the Hardware Ids from Device Manager, and what the updater and the mixer displayed.
-- Part 2: the copied logs (dry run, original file, patched file), what the mixer displayed (`UP`, `donE`, `FAIL`), and whether it started normally afterwards.
-- For the Mac test: does **DN-X600** show up in Audio MIDI Setup with 8 inputs and 8 outputs, and do playback, recording and MIDI work?
+1. Put the mixer in update mode again (**DUCKING + SELECT** while powering on, display shows **UP**) with the USB cable connected.
+2. Click **Connect to the mixer** and choose the Denon device in the browser's list. The page prints "Connected: ..." in the log. If no device appears, or Chrome can't open it, copy what you see and stop here
+   (on Windows, the driver installed for Denon's updater can sometimes get in the way; if so, trying again from a Mac is a good next step).
+3. Choose **Original firmware ✓**, untick *dry run*, tick the acknowledgement and press **Start**. It takes a few minutes. **Don't touch anything** once it says "Executing".
+   (The **stop** link only works before that point.)
+4. The mixer should show **donE**. Switch it off and on. Copy the log.
 
-## If the mixer doesn't start after an update
-Don't keep retrying blindly. Try the update-mode procedure with Denon's updater and the original file once more. If the display stays dark, the flash chip (an EN29LV160BB, IC103)
-needs to be rewritten with an external programmer; see the main [README](../README.md#if-it-does-not-start). This is a risk of every firmware update, with Denon's own updater too.
+If this worked, the web flasher talks to your mixer correctly, and the mixer is exactly as before.
+
+## 4. Flash the patched firmware and try it
+
+1. Repeat step 3 but choose **Patched firmware ✓**. (Same procedure, same page; just load Denon's zip again if you reloaded the page.)
+2. Switch the mixer off and on. It should start normally.
+3. The fix only applies in **Mac mode**: unplug USB, hold **EFX CUE** and press **BEAT ◀ ▶** to enter the OS setting mode, choose **Mac OS**, press **TAP**, then **switch the mixer off and on**.
+4. Connect it to a Mac. In **Audio MIDI Setup** it should show **DN-X600** with 8 in / 8 out. Test playback, recording and MIDI if you can.
+   *Only have Windows?* Set it back to Windows (same key combination), power-cycle, and check that audio and MIDI still work as before with Denon's driver. That's a useful result too.
+
+## What to send back
+[Open an issue on GitHub](https://github.com/WhatMeansGithub/DN-X1700/issues) or reply in the forum thread with:
+- Windows version and Chrome/Edge version (and the Mac model and macOS version if you used one).
+- The link to your `.pcapng` capture and the **Hardware Ids** text from Device Manager.
+- The copied logs: dry run, original firmware, patched firmware.
+- What the mixer's display showed (`UP`, `donE`, `FAIL`) and whether it started normally after each flash.
+- The Mac results: does it show up in Audio MIDI Setup, and do audio and MIDI work?
+- Anything confusing or broken, however small.
+
+## If something goes wrong
+- An error or a stop **before** "Executing": switch the mixer off and on and it should be as it was. Send us the log.
+- A failure **during** or after Executing, or the mixer not starting: don't keep retrying blindly. Try update mode with Denon's updater and the original file once more. If the display stays dark, the flash chip
+  (an EN29LV160BB, IC103) needs an external programmer; see the [README](../README.md#if-it-does-not-start). Every firmware update has this risk, Denon's own included.
+- The web page itself looks wrong or confusing: that's useful feedback too.
+
+Technical background, for the curious: [x600.md](x600.md).
