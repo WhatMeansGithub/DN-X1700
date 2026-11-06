@@ -16,3 +16,9 @@ captures/
 __pycache__/
 *.pyc
 CLAUDE.md
+# Private handoff notes, not for the public repo
+docs/roadmap.md
+
+# Denon firmware downloads for other models (zips, unpacked updaters, PDFs): local only
+X1600 Firmware/
+X600 Firmware/
