@@ -3,12 +3,9 @@
 Firmware patches for the **Denon DJ DN-X1700** mixer (system software v2.000) that make its USB audio and MIDI work with the
 built-in class driver in current macOS, with no vendor driver: 8 in / 8 out, 24-bit, at 44.1, 48 or 96 kHz.
 
-> **DN-X1600 owners:** an **experimental** port of the same fix is at
-> **https://whatmeansgithub.github.io/DN-X1700/x1600/**. It has **not been tested on a real DN-X1600 yet**. The DN-X1600
-> firmware is built from the same code (identical USB descriptor, same faulty sample-rate code, same updater), and it passed
-> the same checks as the working DN-X1700 image, so it should work in theory. No guarantees. Details: [docs/x1600.md](docs/x1600.md).
-> If you try it, please [open an issue](https://github.com/WhatMeansGithub/DN-X1700/issues) or reply in the
-> [Engine DJ community thread](https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550) with the result.
+> **DN-X1600 owners:** there is an **experimental, untested** version of this fix for your mixer. See
+> [DN-X1600 (experimental)](#dn-x1600-experimental-not-tested-on-a-real-unit) below, or go straight to the
+> [web tool for the DN-X1600](https://whatmeansgithub.github.io/DN-X1700/x1600/).
 
 > **This repository contains no Denon firmware.** You download the official firmware from Denon, and a script on your own
 > computer applies the patches and builds the image. Nothing here is from, or endorsed by, Denon DJ or inMusic.
@@ -235,6 +232,47 @@ If the mixer shows nothing at power-up after an update, the flash chip was left 
 the chip (IC103, EN29LV320AB, 4 MB parallel NOR in a TSOP48 package) with an external programmer (for example an XGecu T48 with
 a TSOP48 adapter), typically after desoldering it. The data to write is the original 4 MB `X1700FW.BIN` (the updater rewrites
 the whole chip from that file). This repository does not provide support for that.
+
+---
+
+## DN-X1600 (experimental, not tested on a real unit)
+
+**Web tool: https://whatmeansgithub.github.io/DN-X1700/x1600/**
+
+The DN-X1600 has the same USB audio problem as the DN-X1700, and its firmware (system software v2.000) is built from the same
+code, so the fix is the same one, ported. **It has not been tested on a real DN-X1600.** Nobody, including the author, has run it
+on a DN-X1600 yet. Treat it as experimental, and everything in [the disclaimer above](#read-this-first-disclaimer-and-risks)
+applies to it, including **no guarantees**.
+
+**Why it should work, in theory:**
+
+- The DN-X1600's USB descriptor is byte for byte the same as the DN-X1700's, so patch `001` applies unchanged (same three bytes).
+- The faulty sample-rate code that patch `002` fixes is the same code at different addresses, and so are the updater and its checksum
+  rule (the DN-X1600 image is 2 MiB instead of 4 MiB). Linux has carried a special case for this mixer since 2021 because
+  "switching rates via software is currently not working", which is the same bug.
+- The patched image passed the same checks as the working DN-X1700 one: every address is verified against the original file, the
+  added code runs in a simulator at 44.1, 48 and 96 kHz (12 of 12 pass), and the web tool, the build script and the tests all
+  produce the same file (sha256 `c8209396c80fee970bf9692ecf96717ae39c27f54b1567156d369bb533e4d1bd`).
+
+**What the checks cannot show:** the simulator stands in for the mixer's own sample-rate reader, so only a real DN-X1600 can
+confirm it works.
+
+**If it doesn't work**, the likely outcome is that USB audio on the Mac still doesn't work. The changed code only runs when a
+computer asks the mixer about its USB audio settings. The start-up code, the updater, the effects and the mixing are not touched.
+You can flash Denon's original `X1600FW.BIN` back the same way. The real risk is the same as for any firmware update: a power cut
+during the ~30 second write can leave the mixer needing an external flash programmer, and your settings and presets are reset. The recovery notes in [If it does not start](#if-it-does-not-start) describe the DN-X1700's flash chip; the DN-X1600's chip has not been checked.
+
+**Using it:** the web tool works like the DN-X1700 one: download Denon's DN-X1600 v2.000 zip, drop it on the page, save the
+patched `X1600FW.BIN`. Flashing differs from the DN-X1700: hold **MIC2** and **DUCKING** while switching on until the display says
+"Ver. UP", then press **UTILITY**, then **MIDI CLK** (the page shows each step). On the Mac, set **PC/MAC** to **MAC** and
+power-cycle the mixer after changing it or the sample rate, as on the DN-X1700.
+
+**Please report back**, whether it worked or not: [open an issue](https://github.com/WhatMeansGithub/DN-X1700/issues) or reply in
+the [Engine DJ community thread](https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550) with your Mac model and macOS version, whether the mixer shows up in Audio MIDI Setup as 8 in /
+8 out, playback and recording at 44.1, 48 and 96 kHz, and MIDI. Technical details: [docs/x1600.md](docs/x1600.md).
+
+The DN-X600 is built from the same code but updates differently (Denon's updater app over the USB cable), so it is **not**
+supported yet.
 
 ---
 
