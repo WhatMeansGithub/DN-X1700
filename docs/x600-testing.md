@@ -50,7 +50,7 @@ Flashing Denon's own original file is the same as a normal firmware update; it r
 
 Open <https://whatmeansgithub.github.io/DN-X1700/x600/> in **Chrome or Edge** (Safari and Firefox can't talk to USB HID devices). This works on Windows and on a Mac.
 
-1. **Steps 1 and 2 on that page:** download Denon's zip (link on the page) and drop it on the page. It checks the file and builds the patched one in your browser (nothing is uploaded).
+1. **Steps 1 and 2 on that page:** download Denon's zip (link on the page) and drop it on the page (or click the box and choose it). That is the only place a file is chosen: the page checks it and builds the patched version from it in your browser (nothing is uploaded). The flasher in step 4 then shows "Loaded ..." and offers both the original and the patched version of that same file.
 2. Scroll to step 4 and open **"Option A: flash straight from this page"**.
 3. **Dry run first.** Tick *dry run*, tick the acknowledgement, press **Start**. Nothing is sent to the mixer. Copy the log with *copy log* and keep it.
 4. Put the mixer in update mode (hold **DUCKING + SELECT** while powering on, display shows **UP**), connect the USB cable, press **Connect to the mixer** and pick the Denon device in the browser's list.
