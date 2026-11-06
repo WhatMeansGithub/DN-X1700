@@ -7,7 +7,8 @@ built-in class driver in current macOS, with no vendor driver: 8 in / 8 out, 24-
 > **https://whatmeansgithub.github.io/DN-X1700/x1600/**. It has **not been tested on a real DN-X1600 yet**. The DN-X1600
 > firmware is built from the same code (identical USB descriptor, same faulty sample-rate code, same updater), and it passed
 > the same checks as the working DN-X1700 image, so it should work in theory. No guarantees. Details: [docs/x1600.md](docs/x1600.md).
-> If you try it, please [open an issue](https://github.com/WhatMeansGithub/DN-X1700/issues) with the result.
+> If you try it, please [open an issue](https://github.com/WhatMeansGithub/DN-X1700/issues) or reply in the
+> [Engine DJ community thread](https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550) with the result.
 
 > **This repository contains no Denon firmware.** You download the official firmware from Denon, and a script on your own
 > computer applies the patches and builds the image. Nothing here is from, or endorsed by, Denon DJ or inMusic.
