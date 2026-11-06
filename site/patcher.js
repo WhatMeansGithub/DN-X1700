@@ -10,7 +10,23 @@
   const sizeOf = (P) => (P && P.size) || SIZE;
   const nameOf = (P) => (P && P.fwName) || 'X1700FW.BIN';
   const BOOT_END = 0x10000;       // never patch the boot area
-  const TARGET = 0xFFFFFFFF;      // updater rule: little-endian 32-bit word sum of the whole image
+  const TARGET = 0xFFFFFFFF;      // X1700/X1600 updater rule: little-endian 32-bit word sum of the whole image
+  // DN-X600 (P.integrity === 'crc32'): Denon's DDJ Updater wants crc32(image[:-4] + 4 zero bytes) stored big-endian in the last 4 bytes,
+  // and the size stored big-endian just before it (from ddj_updater.exe; see docs/x600.md). The last 32 bytes are a header.
+  const CRC_HEADER = 0x20;
+  const CRC_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(bytes, extraZeros) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    for (let i = 0; i < (extraZeros || 0); i++) c = CRC_TABLE[c & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  const isCrc = (P) => !!P && P.integrity === 'crc32';
+  function integrityOk(img, P) {
+    if (!isCrc(P)) return wordSum(img) === TARGET;
+    const dv = new DataView(img.buffer, img.byteOffset, img.length);
+    return dv.getUint32(img.length - 8, false) === img.length && dv.getUint32(img.length - 4, false) === crc32(img.subarray(0, img.length - 4), 4);
+  }
 
   class UserError extends Error {}
 
@@ -111,18 +127,18 @@
   function buildImage(orig, P) {
     const SIZE = sizeOf(P);
     if (orig.length !== SIZE)
-      throw new UserError(`That file is ${orig.length.toLocaleString('en-US')} bytes. The firmware must be exactly ${SIZE.toLocaleString('en-US')} bytes (${nameOf(P)} from Denon's v2.000 download).`);
+      throw new UserError(`That file is ${orig.length.toLocaleString('en-US')} bytes. The firmware must be exactly ${SIZE.toLocaleString('en-US')} bytes (${nameOf(P)} from Denon's ${(P && P.version) || 'v2.000'} download).`);
     const origSha = sha256(orig);
     if (origSha !== P.originalSha256)
-      throw new UserError('This is not the original Denon v2.000 firmware, so it will not be patched. ' +
+      throw new UserError(`This is not the original Denon ${(P && P.version) || 'v2.000'} firmware, so it will not be patched. ` +
         `Expected sha256 ${P.originalSha256} but got ${origSha}. Use the file from Denon's download page (link above); a file that was already patched or modified is refused.`);
-    if (wordSum(orig) !== TARGET) throw new UserError('The firmware fails its own checksum, so it will not be patched.');
+    if (!integrityOk(orig, P)) throw new UserError('The firmware fails its own checksum, so it will not be patched.');
 
     const img = orig.slice();
     const changes = [];
     for (const e of P.patches) {
       const exp = fromHex(e.expect), nw = fromHex(e.new);
-      if (exp.length !== nw.length || e.offset < BOOT_END || e.offset + nw.length > SIZE - 4)
+      if (exp.length !== nw.length || e.offset < BOOT_END || e.offset + nw.length > SIZE - (isCrc(P) ? CRC_HEADER : 4))
         throw new Error('Internal error: bad patch definition at ' + e.offset);
       for (let i = 0; i < exp.length; i++)
         if (img[e.offset + i] !== exp[i]) throw new UserError(`The firmware differs from the expected original at offset 0x${e.offset.toString(16)}. Not patching.`);
@@ -131,13 +147,16 @@
     }
     const dv = new DataView(img.buffer);
     const oldWord = toHex(img.subarray(SIZE - 4));
-    dv.setUint32(SIZE - 4, 0, true);
-    dv.setUint32(SIZE - 4, (TARGET - wordSum(img)) >>> 0, true);     // balance the updater checksum
-    if (wordSum(img) !== TARGET) throw new Error('Internal error: checksum fix failed.');
+    if (isCrc(P)) dv.setUint32(SIZE - 4, crc32(img.subarray(0, SIZE - 4), 4), false);
+    else {
+      dv.setUint32(SIZE - 4, 0, true);
+      dv.setUint32(SIZE - 4, (TARGET - wordSum(img)) >>> 0, true);     // balance the updater checksum
+    }
+    if (!integrityOk(img, P)) throw new Error('Internal error: checksum fix failed.');
     const sha = sha256(img);
     if (sha !== P.resultSha256) throw new Error('Internal error: the result does not match the reference build (' + sha + ').');
     return { image: img, sha256: sha, originalSha256: origSha, changes, checksumWord: { old: oldWord, new: toHex(img.subarray(SIZE - 4)) } };
   }
 
-  return { SIZE, UserError, sha256, wordSum, loadFirmware, buildImage, extractFromZip, setInflate, toHex, fromHex };
+  return { SIZE, UserError, sha256, wordSum, crc32, integrityOk, loadFirmware, buildImage, extractFromZip, setInflate, toHex, fromHex };
 });

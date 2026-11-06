@@ -27,6 +27,7 @@ MODELS = {
         sha256="24ef3d26a116118d27787c337a8a89d67cb6b314cca38f6f22d906b3785556f3",
         size=0x400000,                # updater reads 4 x 1 MiB, LE word sum == 0xFFFFFFFF [C]
         fw_name="X1700FW.BIN",
+        integrity="lesum",
         patch_dir=ROOT / "patches",   # X1700 patches stay at the top level (web tool + patcher program read them)
         app_end=0xD3908,              # first 0xFF padding after the app [C]
         usb_pid=0x500A,
@@ -49,6 +50,7 @@ MODELS = {
         sha256="befd35c43411b39e796656f12aa850badee49d677522ce5f7a5db504e346c120",
         size=0x200000,                # updater (RAM 0x0C039598) reads 2 x 1 MiB, same LE word-sum rule (cmp/eq #-1) [C]
         fw_name="X1600FW.BIN",
+        integrity="lesum",
         patch_dir=ROOT / "patches/x1600",
         app_end=0xCB350,
         usb_pid=0x500E,
@@ -64,6 +66,31 @@ MODELS = {
         cave=0x0C0B926C,              # lowercase table, same 155 bytes + NUL ("cr" in place of the X1700's "dp") [C]
         cave_len=155,
         cmd_ptrs=0x0C0BAE60,
+    ),
+    # DN-X600 v1.030: update goes through Denon's DDJ Updater over USB-B (HID), which checks a CRC-32 + size trailer [C].
+    # Patch-002 anchors derived 2026-11-06 (docs/x600.md).
+    "X600": dict(
+        image=ROOT / "firmware/original/X600FW.BIN",
+        sha256="d58c122694f03493a7fe7da0ddbc77d63e67a317978d6e42285fff861037b5d8",
+        size=0x200000,
+        fw_name="X600FW.BIN",
+        integrity="crc32",
+        patch_dir=ROOT / "patches/x600",
+        app_end=0xBDD34,              # approximate; re-derive before use
+        usb_pid=0x500F,
+        cfg_desc=0xBDACC,             # byte-identical to the X1700's 385-byte descriptor [C]
+        # USB class handler = X1700's shifted by -0xDEF4 (masked opcode match, 2026-11-06) [C]; gen_patch002.py re-checks each anchor
+        get_rate_idx=0x0C01A878,      # unique masked match of the X1700 getter [C]; settings offsets / caller checked by gen_patch002
+        reply=0x0C02B156,
+        site_rate=0x0C02AFD6,
+        site_range=0x0C02B020,
+        site_sel=0x0C02B058,
+        back_tail=0x0C02B024,
+        back_sel=0x0C02B07A,
+        range_tbl=0x0C0AD95D,
+        cave=0x0C0AC650,              # lowercase table at flash 0xBC650 ("cr" variant as on the X1600) [C]
+        cave_len=155,
+        cmd_ptrs=0x0C0AD8B8,
     ),
 }
 

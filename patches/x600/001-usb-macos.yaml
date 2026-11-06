@@ -1,0 +1,24 @@
+name: usb-macos
+description: >
+  DN-X600 (v1.030) port of patches/001-usb-macos.yaml. The X600's 385-byte USB configuration descriptor (flash 0xbdacc) is
+  byte-identical to the X1700's (flash 0xd36a0), so the same three bytes change at the same descriptor offsets
+  (+0x0d, +0x8c, +0xc3). Evidence for the fix itself: docs/usb.md (X1700 real unit). See docs/x600.md.
+status: ported from the X1700 (flashed and confirmed there); NOT flashed on an X600
+patches:
+  - offset: 0xbdad9
+    expect: "ff"
+    new: "01"
+    reason: >
+      IAD 0 (interfaces 0-2) bFunctionClass 0xFF (vendor) -> 0x01 (Audio). usbaudiod logs
+      AUAErrorCode.missingAssociation and drops the device without an audio-class IAD.
+  - offset: 0xbdb58
+    expect: "05"
+    new: "00"
+    reason: >
+      AS_GENERAL (IF1, playback) bmControls 0x05 claims read-only Active Alt Setting + Valid Alt Settings controls.
+      The firmware STALLs those requests (probed on the X1700), and usbaudiod tears the device down after
+      the stalls. 0x00 = no controls claimed, so macOS does not ask.
+  - offset: 0xbdb8f
+    expect: "05"
+    new: "00"
+    reason: Same as above for the record stream (IF2, AS_GENERAL).

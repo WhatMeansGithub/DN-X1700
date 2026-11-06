@@ -41,7 +41,8 @@ M = models.get(a.model)
 ORIG_SHA, SIZE = M["sha256"], M["size"]
 orig = M["image"].read_bytes()
 assert sha(orig) == ORIG_SHA and len(orig) == SIZE, "original image hash mismatch"
-assert checksum.word_sum(orig) == checksum.TARGET, "original image fails its own updater checksum"
+CK_OK, CK_FIX = checksum.RULES[M["integrity"]]
+assert CK_OK(orig), "original image fails its own updater checksum"
 
 files = sorted(M["patch_dir"].glob("[0-9][0-9][0-9]-*.yaml"))
 if a.patches is not None:
@@ -61,8 +62,8 @@ for f in files:
             sys.exit(f"{f.name} @{off:#x}: expect/new length differ")
         if off < BOOT_END and not a.allow_boot:
             sys.exit(f"{f.name} @{off:#x}: touches the boot area (< {BOOT_END:#x}); refusing without --allow-boot")
-        if off + len(new) > SIZE - 4:
-            sys.exit(f"{f.name} @{off:#x}: would overlap the checksum word")
+        if off + len(new) > SIZE - (0x20 if M["integrity"] == "crc32" else 4):
+            sys.exit(f"{f.name} @{off:#x}: would overlap the checksum word / file header")
         if bytes(img[off:off + len(exp)]) != exp:
             sys.exit(f"{f.name} @{off:#x}: expected {exp.hex()} but found {bytes(img[off:off + len(exp)]).hex()}; not applying")
         img[off:off + len(new)] = new
@@ -70,8 +71,8 @@ for f in files:
     applied.append(f.stem)
 
 old_word = bytes(img[-4:])
-out = checksum.fix(bytes(img))
-assert checksum.word_sum(out) == checksum.TARGET and len(out) == SIZE
+out = CK_FIX(bytes(img))
+assert CK_OK(out) and len(out) == SIZE
 
 # independent verification: the only differences are the listed patch bytes plus the checksum word
 diff = [i for i in range(len(orig)) if orig[i] != out[i]]
