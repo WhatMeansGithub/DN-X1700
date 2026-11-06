@@ -42,6 +42,7 @@
   .top { display:flex; align-items:center; justify-content:space-between; padding:18px 0; font-weight:600; }
   .top a { font-weight:500; font-size:.92rem; text-decoration:none; color:var(--muted); }
   .top a:hover { color:var(--text); }
+  .toplinks { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px 18px; }
   .brand { display:flex; align-items:center; gap:10px; }
   .logo { width:30px; height:30px; border-radius:9px; background:linear-gradient(135deg,var(--accent),#8a5cff); display:grid; place-items:center; }
   .logo svg { width:18px; height:18px; stroke:#fff; }
@@ -119,6 +120,8 @@
   .tablewrap { overflow-x:auto; margin-top:10px; }
   table { border-collapse:collapse; width:100%; font-size:.85rem; min-width:520px; }
   th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; } th { color:var(--muted); font-weight:600; }
+  td code { white-space:normal; word-break:break-all; }
+  td:first-child code { white-space:nowrap; word-break:normal; }   /* keep offsets on one line */   /* long byte strings (patch 002 is 148 bytes) wrap instead of making the table thousands of px wide */
 
   /* flashing instructions */
   .flash { counter-reset:f; list-style:none; margin:0; padding:0; display:grid; gap:10px; }
@@ -135,7 +138,7 @@
 
   @media (max-width: 560px) {
     .wrap { padding:0 14px; }
-    .step { grid-template-columns:1fr; gap:10px; padding:16px; }
+    .step { grid-template-columns:minmax(0,1fr); gap:10px; padding:16px; }   /* minmax: wide content scrolls inside, never widens the page */
     .badge { width:34px; height:34px; font-size:.95rem; }
     .done > .badge svg { width:18px; height:18px; }
     .risk { grid-template-columns:1fr; gap:8px; } .btn { width:100%; }
@@ -149,7 +152,7 @@
 
   <header class="top">
     <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h3l2-6 4 12 2-6h5"/></svg></span> DN-X1700 Mac USB fix</div>
-    <a href="https://github.com/WhatMeansGithub/DN-X1700">Source on GitHub</a>
+    <nav class="toplinks"><a href="x1600/">DN-X1600 version</a><a href="https://github.com/WhatMeansGithub/DN-X1700">Source on GitHub</a></nav>
   </header>
 
   <section class="hero">
