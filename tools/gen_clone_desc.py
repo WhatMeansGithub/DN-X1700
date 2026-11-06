@@ -47,7 +47,15 @@ CHANGES = {
               lambda c: [setb(c, o + 14, [0, 0]) for o in in_terms] + [setb(c, o + 9, [0, 0]) for o in out_terms]),
     "as":    ("AS_GENERAL bmControls 0x05 -> 0 (active/valid alt setting controls)",
               lambda c: [setb(c, o + 4, [0]) for o in as_gen]),
+    # Linux finds this one: bmControls bits 0-1 = pitch control present -> snd-usb-audio SETs it, the firmware STALLs, hw_params fails (-EPIPE).
+    "pitch": ("CS iso endpoint bmControls 0x15 -> 0x14 (no pitch control)", lambda c: [setb(c, o + 4, [0x14]) for o in cs_ep]),
     "ep":    ("CS iso endpoint bmControls 0x15 -> 0", lambda c: [setb(c, o + 4, [0]) for o in cs_ep]),
+    # What the real unit sends in MAC mode after init (usb.md): iso endpoints synchronous (0x0D) instead of adaptive (0x09).
+    "sync":  ("iso EP bmAttributes 0x09 -> 0x0D (MAC-mode runtime rewrite)",
+              lambda c: [setb(c, o, [0x0D]) for o in (161, 216)]),
+    # Isolation test for the MPC: drop IAD1 + MIDI + HID, leave only the audio function (ifaces 0-2).
+    "audioonly": ("keep only IAD0 audio function (ifaces 0-2), cut at IAD1",
+                  lambda c: (c.__delitem__(slice(iads[1], None)), setb(c, 2, [iads[1] & 0xFF, iads[1] >> 8]), setb(c, 4, [3]))),
     # Bandwidth sanity for the FULL-SPEED clone only (NOT for the real unit): 2 ch / 16 bit = 176 B/ms <= 312.
     "fs2ch": ("FS bandwidth sanity: 8ch/24bit -> 2ch/16bit in terminals + AS + format",
               lambda c: [setb(c, o + 8, [2]) or setb(c, o + 9, [3, 0, 0, 0]) for o in in_terms]
@@ -63,6 +71,11 @@ VARIANTS = [
     ("v4 iad+term+as+ep", ["iad", "term", "as", "ep"]),
     ("v5 iad+as (minimal)", ["iad", "as"]),
     ("v6 iad+as+fs2ch", ["iad", "as", "fs2ch"]),
+    ("v7 iad+as+sync (real MAC-mode set)", ["iad", "as", "sync"]),
+    ("v8 iad+as+sync+fs2ch (FS test for MPC)", ["iad", "as", "sync", "fs2ch"]),
+    ("v9 = v8 descriptors, LENIENT stub (main.c)", ["iad", "as", "sync", "fs2ch"]),
+    ("v10 = v8 + audio function only", ["iad", "as", "sync", "fs2ch", "audioonly"]),
+    ("v11 = v8 + pitch fix (Linux)", ["iad", "as", "sync", "fs2ch", "pitch"]),
 ]
 
 built = []
@@ -91,4 +104,4 @@ out.append("static const uint8_t *const variant_cfg[NUM_VARIANTS] = {" + ", ".jo
 for p, (d, _) in CHANGES.items():
     print(f"  {p:6s} {d}")
 for i, (name, parts, b) in enumerate(built):
-    print(f"{i}: {name:22s} bytes changed vs captured: {sum(1 for j in range(len(cfg)) if b[j] != cfg[j])}")
+    print(f"{i}: {name:22s} bytes changed vs captured: {sum(1 for j in range(min(len(cfg), len(b))) if b[j] != cfg[j])}")

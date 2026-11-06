@@ -14,7 +14,7 @@
 
 static usbd_device *usbd;
 static uint8_t control_buf[256] __attribute__((aligned(4)));
-#define START_VARIANT 5                                 /* v5 = IAD class + AS controls only (the real patch set); KEY -> v6, v0, ... */
+#define START_VARIANT 11                                /* v5 = IAD class + AS controls only (the real patch set); KEY -> v6, v0, ... */
 static volatile unsigned variant = START_VARIANT;
 
 static const char *const strings[] = {"D&M--", "DN-X1700"};
@@ -44,13 +44,16 @@ static const struct usb_config_descriptor config = {
 static void led(int on) { if (on) gpio_clear(GPIOC, GPIO13); else gpio_set(GPIOC, GPIO13); }
 
 /* Mimic what the REAL X1700 answered in tools/probe_uac2.swift (captures/probe-uac2-real-x1700.txt):
- *   clock source 5 rate: GET_CUR ff ff ff ff, GET_RANGE one range 44100..44100
+ *   clock source 5 rate: GET_CUR ff ff ff ff (patched unit: 44100), GET_RANGE one range 44100..44100
  *   clock selector 7 GET_CUR: 0xf9 (sic)
  *   everything else (clock validity, terminal/AS controls, latency, ...): STALL */
-static uint32_t cur_rate = 0xFFFFFFFF;
-static uint8_t sel_cur = 0xF9;                                                   /* real unit reads 0xf9 */
+static uint32_t cur_rate = 44100;                                                /* patched unit (patch 002) reports the real rate */
+static uint8_t sel_cur = 1;                                                      /* patched unit at 44.1 kHz: pin 1 (was 0xf9) */
 static uint8_t reply[64] __attribute__((aligned(4)));
 
+/* v9 only: answer every class request the real unit would STALL (latency, cluster, AS controls, validity...) with zeros / OK.
+ * If the MPC's -32 goes away here, a stalled request is the cause. */
+#define LENIENT() (variant == 9)
 static enum usbd_request_return_codes uac2_request(struct usb_setup_data *req, uint8_t **buf, uint16_t *len)
 {
     uint8_t entity = req->wIndex >> 8, cs = req->wValue >> 8;
@@ -69,6 +72,11 @@ static enum usbd_request_return_codes uac2_request(struct usb_setup_data *req, u
     } else if (entity == 7 && cs == 1 && out && req->bRequest == 1) {            /* selector SET_CUR: the real unit ACCEPTS it ... */
         return USBD_REQ_HANDLED;                                                 /* ... and ignores it (probe: reads back 0xf9) */
     } else if (entity == 7 && cs == 1 && !out && req->bRequest == 1) { reply[0] = sel_cur; *len = 1; }
+    else if (LENIENT()) {
+        if (out) return USBD_REQ_HANDLED;                                        /* accept any SET_CUR */
+        memset(reply, 0, sizeof reply);
+        *len = req->bRequest == 2 ? 2 : (req->wLength < sizeof reply ? req->wLength : sizeof reply);
+    }
     else return USBD_REQ_NOTSUPP;
     if (*len > req->wLength) *len = req->wLength;
     *buf = reply;
@@ -84,7 +92,7 @@ static enum usbd_request_return_codes control_cb(usbd_device *d, struct usb_setu
     if (type == USB_REQ_TYPE_STANDARD) {
         if (req->bRequest == USB_REQ_GET_DESCRIPTOR && (req->wValue >> 8) == USB_DT_CONFIGURATION) {
             const uint8_t *c = variant_cfg[variant];
-            uint16_t n = 385;
+            uint16_t n = c[2] | (c[3] << 8);                                     /* wTotalLength (v10 is shorter) */
             *buf = (uint8_t *)c;
             *len = req->wLength < n ? req->wLength : n;
             return USBD_REQ_HANDLED;
@@ -94,7 +102,7 @@ static enum usbd_request_return_codes control_cb(usbd_device *d, struct usb_setu
         return USBD_REQ_NEXT_CALLBACK;                                           /* library handles the rest */
     }
     if (type == USB_REQ_TYPE_CLASS && (req->bmRequestType & USB_REQ_TYPE_RECIPIENT) == USB_REQ_TYPE_INTERFACE
-        && (req->wIndex & 0xFF) == 0)
+        && ((req->wIndex & 0xFF) == 0 || LENIENT()))
         return uac2_request(req, buf, len);
     return USBD_REQ_NOTSUPP;
 }
