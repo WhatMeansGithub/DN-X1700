@@ -260,13 +260,13 @@ confirm it works.
 **If it doesn't work**, the likely outcome is that USB audio on the Mac still doesn't work. The changed code only runs when a
 computer asks the mixer about its USB audio settings. The start-up code, the updater, the effects and the mixing are not touched.
 You can flash Denon's original `X1600FW.BIN` back the same way. The real risk is the same as for any firmware update: a power cut
-during the ~30 second write can leave the mixer needing an external flash programmer, and your settings and presets are reset. Note that the DN-X1600 has a **different, smaller flash chip** than the DN-X1700 (see below), so the part numbers in [If it does not start](#if-it-does-not-start) do not apply to it.
+during the ~30 second write can leave the mixer needing an external flash programmer, and your settings and presets are reset. Note that the DN-X1600 has a **different, smaller flash chip** than the DN-X1700 (see below), so the part number in [If it does not start](#if-it-does-not-start) does not apply to it.
 
-**Flash chip:** the DN-X1600's firmware image is 2 MiB, and its updater only accepts a flash chip with device ID `0x2249` or
-`0x22C4` (the DN-X1700's accepts `0x22F9`, the 4 MB EN29LV320AB). Those two IDs are the bottom-boot and top-boot versions of a
-16 Mbit (2 MB) chip family such as Eon's EN29LV160 (this identification comes from datasheets, not from the firmware, so check
-the chip on your board before ordering anything). If a flash ever has to be reprogrammed externally, use the original DN-X1600
-image and a programmer setting for the chip that is actually fitted.
+**Flash chip:** the DN-X1600 has a **2 MB flash chip, not the DN-X1700's 4 MB one**. Denon's service manual lists it as IC103,
+an **EN29LV160BB-70TIP** (Eon, 16 Mbit, bottom boot, 48-pin TSOP), and the DN-X1600's updater only accepts a flash chip with device
+ID `0x2249` (EN29LV160 bottom boot) or `0x22C4` (top boot); the DN-X1700's updater expects `0x22F9`, the 4 MB EN29LV320AB. The
+DN-X1600 firmware image is 2 MiB to match. If a flash ever has to be reprogrammed externally, the chip is the same kind of part
+(TSOP48) but a different type: use the original `X1600FW.BIN` and the programmer setting for the EN29LV160, not the EN29LV320.
 
 **Using it:** the web tool works like the DN-X1700 one: download Denon's DN-X1600 v2.000 zip, drop it on the page, save the
 patched `X1600FW.BIN`. Flashing differs from the DN-X1700: hold **MIC2** and **DUCKING** while switching on until the display says
