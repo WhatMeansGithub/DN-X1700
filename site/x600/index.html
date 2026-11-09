@@ -163,6 +163,17 @@
   #wflog { width:100%; min-height:150px; max-height:300px; resize:vertical; font:.8rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
            background:var(--surface-2); color:var(--text); border:1px solid var(--line); border-radius:10px; padding:10px; }
   .btn[disabled] { opacity:.5; cursor:not-allowed; }
+  .toplinks { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:4px 18px; }
+  /* Ko-fi: small pill in the header, big card at the end of step 4 */
+  .kofi-pill { display:inline-flex; align-items:center; gap:6px; padding:3px 12px; border-radius:999px; background:#d93f3b; color:#fff !important; font-weight:700; text-decoration:none !important; }
+  .kofi-pill:hover { background:#bf3531; }
+  .donate { margin-top:18px; padding:18px 20px; border:1px solid var(--line); border-radius:14px; background:var(--surface-2); text-align:center; }
+  .donate h3 { margin:0 0 6px; font-size:1.1rem; }
+  .donate p { margin:0 0 14px; color:var(--muted); }
+  .donate .kofi-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:15px 30px; border-radius:12px; background:#d93f3b; color:#fff; font-weight:800; font-size:1.1rem; text-decoration:none; }
+  .donate .kofi-btn:hover { background:#bf3531; }
+  .donate .kofi-btn svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .donate .sub { margin:12px 0 0; font-size:.92rem; }
 </style>
 </head>
 <body>
@@ -170,7 +181,7 @@
 
   <header class="top">
     <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h3l2-6 4 12 2-6h5"/></svg></span> DN-X600 Mac USB fix</div>
-    <a href="../">DN-X1700 version</a>
+    <nav class="toplinks"><a class="kofi-pill" href="https://ko-fi.com/whatmeansgithub" target="_blank" rel="noopener">&#9749; Support</a><a href="../">DN-X1700 version</a></nav>
   </header>
 
   <section class="hero">
@@ -314,6 +325,12 @@
           <p style="margin-top:10px">If the display shows <strong>FAIL</strong>, click Execute again. Don't switch the mixer off in the middle of an update.
           To go back to the original firmware, flash Denon's original <code>X600FW.BIN</code> the same way. If the mixer shows nothing at power-up after an update, the flash chip needs reprogramming with an external programmer; see the <a href="https://github.com/WhatMeansGithub/DN-X1700#if-it-does-not-start">README</a>.</p>
         </details>
+        <div class="donate">
+          <h3>Did it work?</h3>
+          <p>This tool is free and made in spare time. If it saved you a headache, a coffee helps keep it maintained.</p>
+          <a class="kofi-btn" href="https://ko-fi.com/whatmeansgithub" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13v6a5 5 0 01-5 5H9a5 5 0 01-5-5V8z"/><path d="M17 10h1.5a2.5 2.5 0 010 5H17M8 3v2M12 3v2"/></svg> Buy me a coffee</a>
+          <p class="sub"><a href="https://github.com/WhatMeansGithub/DN-X1700/issues/new" target="_blank" rel="noopener">Tell me how it went</a>: a confirmation from another owner helps everyone.</p>
+        </div>
       </div>
     </li>
 

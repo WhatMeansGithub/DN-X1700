@@ -1,5 +1,5 @@
 <a href="https://ko-fi.com/whatmeansgithub">
-  <img src="https://img.shields.io/badge/Ko--fi-Support%20Me-ff5e5b?logo=ko-fi&logoColor=white" alt="Ko-fi">
+  <img src="https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi">
 </a>
 
 # DN-X1700 USB audio fix for current macOS
@@ -332,5 +332,5 @@ for interoperability depends on your country's law. That is your responsibility 
 ## Donate 
 If this project has helped you out and you would like to donate, you can buy me a coffee with the button below :)
 <a href="https://ko-fi.com/whatmeansgithub">
-  <img src="https://img.shields.io/badge/Ko--fi-Support%20Me-ff5e5b?logo=ko-fi&logoColor=white" alt="Ko-fi">
+  <img src="https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi">
 </a>
