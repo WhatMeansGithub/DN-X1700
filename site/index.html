@@ -9,7 +9,7 @@
 <style>
   :root {
     --bg:#f5f6fa; --surface:#ffffff; --surface-2:#f0f2f8; --text:#13151d; --muted:#5a6072; --line:#e2e5ef;
-    --accent:#3355ff; --accent-strong:#2440d6; --accent-soft:#e8ecff; --on-accent:#ffffff;
+    --accent:#0e7490; --accent-strong:#0b5e75; --accent-soft:#e3f4f8; --on-accent:#ffffff;
     --danger:#b42318; --danger-bg:#fef3f2; --danger-line:#f7c1bc;
     --warn:#9a5b00; --warn-bg:#fff8eb; --warn-line:#f1d9a6;
     --ok:#067647; --ok-bg:#ecfdf3; --ok-line:#a9e2c0;
@@ -19,7 +19,7 @@
   @media (prefers-color-scheme: dark) {
     :root {
       --bg:#0c0e13; --surface:#151821; --surface-2:#1c2030; --text:#eceef6; --muted:#9aa1b6; --line:#262b3b;
-      --accent:#7f95ff; --accent-strong:#9fb0ff; --accent-soft:#1c2347; --on-accent:#0b0e1c;
+      --accent:#22b8cf; --accent-strong:#5fd4e4; --accent-soft:#0d2a30; --on-accent:#03181c;
       --danger:#ff8a80; --danger-bg:#2a1413; --danger-line:#5a2723;
       --warn:#f0b955; --warn-bg:#271e0c; --warn-line:#5a4416;
       --ok:#5ed39a; --ok-bg:#0f2519; --ok-line:#21573a;
@@ -44,11 +44,11 @@
   .top a:hover { color:var(--text); }
   .toplinks { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px 18px; }
   .brand { display:flex; align-items:center; gap:10px; }
-  .logo { width:30px; height:30px; border-radius:9px; background:linear-gradient(135deg,var(--accent),#8a5cff); display:grid; place-items:center; }
-  .logo svg { width:18px; height:18px; stroke:#fff; }
+  .logo { width:30px; height:30px; border-radius:9px; background:var(--accent); display:grid; place-items:center; }
+  .logo svg { width:18px; height:18px; stroke:var(--on-accent); }
   .hero { padding:28px 0 8px; }
   .hero h1 { font-size:clamp(2rem, 5vw, 2.9rem); font-weight:800; letter-spacing:-.03em; }
-  .hero h1 span { background:linear-gradient(120deg,var(--accent),#8a5cff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero h1 span { color:var(--accent-strong); }
   .lead { font-size:1.1rem; color:var(--muted); max-width:60ch; margin-top:14px; }
   .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
   .chip { display:inline-flex; align-items:center; gap:6px; font-size:.85rem; font-weight:600; color:var(--muted); background:var(--surface);
@@ -145,15 +145,27 @@
     .drop { padding:26px 12px; }
   }
   @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } .checks li { opacity:1; transform:none; } }
-  /* Ko-fi: small pill in the header, big card at the end of step 4 */
-  .kofi-pill { display:inline-flex; align-items:center; gap:6px; padding:3px 12px; border-radius:999px; background:#d93f3b; color:#fff !important; font-weight:700; text-decoration:none !important; }
-  .kofi-pill:hover { background:#bf3531; }
+  /* Donate (Ko-fi). Pink + heart: a colour no other element on this page uses (red = danger, amber = warning, blue = main action).
+     Desktop: a quiet outlined pill floats bottom-right once the header has scrolled away, hidden while the step-4 card is on screen.
+     Mobile: no floating button (it would cover the flashing instructions); a plain link sits in the header instead. */
+  :root { --donate:#b8297f; --donate-fill:#d6338f; --donate-fill-hover:#bd2a7c; --donate-soft:#fdf0f7; }
+  @media (prefers-color-scheme: dark) { :root { --donate:#f48cc8; --donate-soft:#2a1424; } }
+  .donate-link { display:none; align-items:center; gap:5px; color:var(--donate) !important; font-weight:700; text-decoration:none !important; }
+  .donate-link svg { width:14px; height:14px; fill:currentColor; }
+  .donate-float { position:fixed; right:20px; bottom:20px; z-index:50; display:inline-flex; align-items:center; gap:7px; padding:9px 16px;
+                  border-radius:999px; border:1.5px solid var(--donate); background:var(--surface); color:var(--donate) !important; font-weight:700;
+                  text-decoration:none !important; box-shadow:var(--shadow); opacity:0; visibility:hidden; transform:translateY(8px);
+                  transition:opacity .2s, transform .2s, visibility .2s; }
+  .donate-float.show { opacity:1; visibility:visible; transform:none; }
+  .donate-float:hover { background:var(--donate-soft); }
+  .donate-float svg { width:15px; height:15px; fill:currentColor; }
+  @media (max-width: 640px) { .donate-link { display:inline-flex; } .donate-float { display:none; } }
   .donate { margin-top:18px; padding:18px 20px; border:1px solid var(--line); border-radius:14px; background:var(--surface-2); text-align:center; }
   .donate h3 { margin:0 0 6px; font-size:1.1rem; }
   .donate p { margin:0 0 14px; color:var(--muted); }
-  .donate .kofi-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:15px 30px; border-radius:12px; background:#d93f3b; color:#fff; font-weight:800; font-size:1.1rem; text-decoration:none; }
-  .donate .kofi-btn:hover { background:#bf3531; }
-  .donate .kofi-btn svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .donate .kofi-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:15px 30px; border-radius:12px; background:var(--donate-fill); color:#fff; font-weight:800; font-size:1.1rem; text-decoration:none; }
+  .donate .kofi-btn:hover { background:var(--donate-fill-hover); }
+  .donate .kofi-btn svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
   .donate .sub { margin:12px 0 0; font-size:.92rem; }
 </style>
 </head>
@@ -162,7 +174,7 @@
 
   <header class="top">
     <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h3l2-6 4 12 2-6h5"/></svg></span> DN-X1700 Mac USB fix</div>
-    <nav class="toplinks"><a class="kofi-pill" href="https://ko-fi.com/whatmeansgithub" target="_blank" rel="noopener">&#9749; Support</a><a href="x1600/">DN-X1600 version</a><a href="https://github.com/WhatMeansGithub/DN-X1700">Source on GitHub</a></nav>
+    <nav class="toplinks"><a class="donate-link" href="https://ko-fi.com/whatmeansgithub" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2 0 3.6 1.1 5 2.9 1.4-1.8 3-2.9 5-2.9 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg> Donate</a><a href="x1600/">DN-X1600 version</a><a href="https://github.com/WhatMeansGithub/DN-X1700">Source on GitHub</a></nav>
   </header>
 
   <section class="hero">
@@ -265,7 +277,7 @@
           <p style="margin-top:10px">If an error code appears on the display, write it down and don't switch the mixer off straight away: the updater retries by itself.
           To go back to the original firmware, flash Denon's original <code>X1700FW.BIN</code> the same way. If the mixer shows nothing at power-up after an update, the flash chip needs reprogramming with an external programmer; see the <a href="https://github.com/WhatMeansGithub/DN-X1700#if-it-does-not-start">README</a>.</p>
         </details>
-        <div class="donate">
+        <div class="donate" id="donateCard">
           <h3>Did it work?</h3>
           <p>This tool is free and made in spare time. If it saved you a headache, a coffee helps keep it maintained.</p>
           <a class="kofi-btn" href="https://ko-fi.com/whatmeansgithub" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13v6a5 5 0 01-5 5H9a5 5 0 01-5-5V8z"/><path d="M17 10h1.5a2.5 2.5 0 010 5H17M8 3v2M12 3v2"/></svg> Buy me a coffee</a>
@@ -364,6 +376,18 @@
   ['dragleave', 'drop'].forEach((t) => window.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
   window.addEventListener('drop', (e) => { const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) handle(f); });   // drop anywhere on the page
   setSteps('waiting');
+})();
+</script>
+<a class="donate-float" id="donateFloat" href="https://ko-fi.com/whatmeansgithub" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2 0 3.6 1.1 5 2.9 1.4-1.8 3-2.9 5-2.9 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg> Donate</a>
+<script>
+/* Floating donate pill: show once the header is out of view, hide while the step-4 donate card is visible. */
+(function () {
+  var f = document.getElementById('donateFloat'), card = document.getElementById('donateCard'), top = document.querySelector('header.top');
+  if (!f || !top || !('IntersectionObserver' in window)) return;
+  var pastTop = false, cardShown = false;
+  function upd() { f.classList.toggle('show', pastTop && !cardShown); }
+  new IntersectionObserver(function (e) { pastTop = !e[0].isIntersecting; upd(); }).observe(top);
+  if (card) new IntersectionObserver(function (e) { cardShown = e[0].isIntersecting; upd(); }).observe(card);
 })();
 </script>
 </body>

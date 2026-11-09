@@ -1,6 +1,7 @@
-<a href="https://ko-fi.com/whatmeansgithub">
-  <img src="https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi">
-</a>
+<p align="center">
+  <a href="https://ko-fi.com/whatmeansgithub"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-d6338f?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Buy me a coffee on Ko-fi" height="48"></a>
+</p>
+<p align="center"><sub>Free and made in spare time. If it saved your mixer, a tip is very welcome.</sub></p>
 
 # DN-X1700 USB audio fix for current macOS
 
@@ -329,8 +330,10 @@ redistribute Denon's firmware or patched images built from it.
 The patches describe changes to Denon's software, whose licence terms restrict modification. Whether that is allowed
 for interoperability depends on your country's law. That is your responsibility to check.
 
-## Donate 
+## Donate
+
 If this project has helped you out and you would like to donate, you can buy me a coffee with the button below :)
-<a href="https://ko-fi.com/whatmeansgithub">
-  <img src="https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20coffee-ff5e5b?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi">
-</a>
+
+<p align="center">
+  <a href="https://ko-fi.com/whatmeansgithub"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-d6338f?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Buy me a coffee on Ko-fi" height="48"></a>
+</p>
