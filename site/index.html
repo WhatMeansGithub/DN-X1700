@@ -19,7 +19,7 @@
   @media (prefers-color-scheme: dark) {
     :root {
       --bg:#0c0e13; --surface:#151821; --surface-2:#1c2030; --text:#eceef6; --muted:#9aa1b6; --line:#262b3b;
-      --accent:#22b8cf; --accent-strong:#5fd4e4; --accent-soft:#0d2a30; --on-accent:#03181c;
+      --accent:#2b8a9b; --accent-strong:#8ec9d3; --accent-soft:#12262b; --on-accent:#031418;
       --danger:#ff8a80; --danger-bg:#2a1413; --danger-line:#5a2723;
       --warn:#f0b955; --warn-bg:#271e0c; --warn-line:#5a4416;
       --ok:#5ed39a; --ok-bg:#0f2519; --ok-line:#21573a;
@@ -145,8 +145,26 @@
     .drop { padding:26px 12px; }
   }
   @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } .checks li { opacity:1; transform:none; } }
+  /* Wide screens: same linear page, but use the width so there is much less scrolling. */
+  .hero h1 span { color:inherit; }
+  @media (min-width: 900px) {
+    body { font-size:17px; }
+    .wrap { max-width:1120px; padding:0 32px; }
+    .hero { padding:18px 0 4px; }
+    .hero h1 { font-size:clamp(2.2rem, 3.6vw, 3rem); }
+    .lead { max-width:82ch; margin-top:10px; }
+    .chips { margin-top:14px; }
+    .risk { margin:20px 0 4px; padding:16px 22px; grid-template-columns:30px 1fr; }
+    .risk ul { list-style:none; padding:0; margin:10px 0 0; display:grid; grid-template-columns:repeat(auto-fit, minmax(270px, 1fr)); gap:10px 14px; }
+    .risk li { margin:0; padding:10px 14px; background:rgba(127,127,127,.09); border-radius:10px; font-size:.95rem; line-height:1.5; }
+    .untested { padding:16px 22px; }
+    .steps { margin-top:18px; gap:12px; }
+    .step { padding:18px 22px; gap:18px; }
+    .drop { padding:22px 16px; }
+    .flash li > div, .step-body > p, .step-body .callout { max-width:96ch; }
+  }
   /* Donate (Ko-fi). Pink + heart: a colour no other element on this page uses (red = danger, amber = warning, blue = main action).
-     Desktop: a quiet outlined pill floats bottom-right once the header has scrolled away, hidden while the step-4 card is on screen.
+     Desktop: a quiet outlined pill is always visible bottom-right.
      Mobile: no floating button (it would cover the flashing instructions); a plain link sits in the header instead. */
   :root { --donate:#b8297f; --donate-fill:#d6338f; --donate-fill-hover:#bd2a7c; --donate-soft:#fdf0f7; }
   @media (prefers-color-scheme: dark) { :root { --donate:#f48cc8; --donate-soft:#2a1424; } }
@@ -154,9 +172,7 @@
   .donate-link svg { width:14px; height:14px; fill:currentColor; }
   .donate-float { position:fixed; right:20px; bottom:20px; z-index:50; display:inline-flex; align-items:center; gap:7px; padding:9px 16px;
                   border-radius:999px; border:1.5px solid var(--donate); background:var(--surface); color:var(--donate) !important; font-weight:700;
-                  text-decoration:none !important; box-shadow:var(--shadow); opacity:0; visibility:hidden; transform:translateY(8px);
-                  transition:opacity .2s, transform .2s, visibility .2s; }
-  .donate-float.show { opacity:1; visibility:visible; transform:none; }
+                  text-decoration:none !important; box-shadow:var(--shadow); }
   .donate-float:hover { background:var(--donate-soft); }
   .donate-float svg { width:15px; height:15px; fill:currentColor; }
   @media (max-width: 640px) { .donate-link { display:inline-flex; } .donate-float { display:none; } }
@@ -379,16 +395,5 @@
 })();
 </script>
 <a class="donate-float" id="donateFloat" href="https://ko-fi.com/whatmeansgithub" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2 0 3.6 1.1 5 2.9 1.4-1.8 3-2.9 5-2.9 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg> Donate</a>
-<script>
-/* Floating donate pill: show once the header is out of view, hide while the step-4 donate card is visible. */
-(function () {
-  var f = document.getElementById('donateFloat'), card = document.getElementById('donateCard'), top = document.querySelector('header.top');
-  if (!f || !top || !('IntersectionObserver' in window)) return;
-  var pastTop = false, cardShown = false;
-  function upd() { f.classList.toggle('show', pastTop && !cardShown); }
-  new IntersectionObserver(function (e) { pastTop = !e[0].isIntersecting; upd(); }).observe(top);
-  if (card) new IntersectionObserver(function (e) { cardShown = e[0].isIntersecting; upd(); }).observe(card);
-})();
-</script>
 </body>
 </html>
