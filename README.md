@@ -1,3 +1,7 @@
+<a href="https://ko-fi.com/whatmeansgithub">
+  <img src="https://img.shields.io/badge/Ko--fi-Support%20Me-ff5e5b?logo=ko-fi&logoColor=white" alt="Ko-fi">
+</a>
+
 # DN-X1700 USB audio fix for current macOS
 
 Firmware patches for the **Denon DJ DN-X1700** mixer (system software v2.000) that make its USB audio and MIDI work with the
@@ -317,9 +321,16 @@ Denon's (see Legal below). The Denon firmware that the build script patches is n
 
 ## Legal
 
+
 Not affiliated with Denon DJ, inMusic or D+M. "Denon", "DN-X1700" and related names belong to their owners. This repository
 contains **no Denon firmware, drivers or manuals**, only patch descriptions and original tooling. Do not publish or
 redistribute Denon's firmware or patched images built from it.
 
 The patches describe changes to Denon's software, whose licence terms restrict modification. Whether that is allowed
 for interoperability depends on your country's law. That is your responsibility to check.
+
+## Donate 
+If this project has helped you out and you would like to donate, you can buy me a coffee with the button below :)
+<a href="https://ko-fi.com/your-username">
+  <img src="https://img.shields.io/badge/Ko--fi-Support%20Me-ff5e5b?logo=ko-fi&logoColor=white" alt="Ko-fi">
+</a>
