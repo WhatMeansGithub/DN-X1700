@@ -7,8 +7,8 @@
 Firmware patches for the **Denon DJ DN-X1700** mixer (system software v2.000) that make its USB audio and MIDI work with the
 built-in class driver in current macOS, with no vendor driver: 8 in / 8 out, 24-bit, at 44.1, 48 or 96 kHz.
 
-> **DN-X1600 owners:** there is an **experimental, untested** version of this fix for your mixer. See
-> [DN-X1600 (experimental)](#dn-x1600-experimental-not-tested-on-a-real-unit) below, or go straight to the
+> **DN-X1600 owners:** the same fix works on your mixer too, **confirmed by a DN-X1600 owner** who flashed it. See
+> [DN-X1600](#dn-x1600-confirmed-by-one-owner) below, or go straight to the
 > [web tool for the DN-X1600](https://whatmeansgithub.github.io/DN-X1700/x1600/).
 
 > **This repository contains no Denon firmware.** You download the official firmware from Denon, and a script on your own
@@ -240,16 +240,16 @@ the whole chip from that file). This repository does not provide support for tha
 
 ---
 
-## DN-X1600 (experimental, not tested on a real unit)
+## DN-X1600 (confirmed by one owner)
 
 **Web tool: https://whatmeansgithub.github.io/DN-X1700/x1600/**
 
 The DN-X1600 has the same USB audio problem as the DN-X1700, and its firmware (system software v2.000) is built from the same
-code, so the fix is the same one, ported. **It has not been tested on a real DN-X1600.** Nobody, including the author, has run it
-on a DN-X1600 yet. Treat it as experimental, and everything in [the disclaimer above](#read-this-first-disclaimer-and-risks)
-applies to it, including **no guarantees**.
+code, so the fix is the same one, ported. **A DN-X1600 owner flashed it on a real unit and reported that it worked.** That is one
+report so far (the author has no DN-X1600), so treat it with the same care as any firmware update: everything in
+[the disclaimer above](#read-this-first-disclaimer-and-risks) applies to it, including **no guarantees**.
 
-**Why it should work, in theory:**
+**Why it works:**
 
 - The DN-X1600's USB descriptor is byte for byte the same as the DN-X1700's, so patch `001` applies unchanged (same three bytes).
 - The faulty sample-rate code that patch `002` fixes is the same code at different addresses, and so are the updater and its checksum
@@ -257,10 +257,10 @@ applies to it, including **no guarantees**.
   "switching rates via software is currently not working", which is the same bug.
 - The patched image passed the same checks as the working DN-X1700 one: every address is verified against the original file, the
   added code runs in a simulator at 44.1, 48 and 96 kHz (12 of 12 pass), and the web tool, the build script and the tests all
-  produce the same file (sha256 `c8209396c80fee970bf9692ecf96717ae39c27f54b1567156d369bb533e4d1bd`).
+  produce the same file (sha256 `ab8e1869bef4e36057d5752f9fcfafadad677e499cb6acd7f9ca2e6f3a883921`).
 
 **What the checks cannot show:** the simulator stands in for the mixer's own sample-rate reader, so only a real DN-X1600 can
-confirm it works.
+confirm it works. One owner has now confirmed that it does. More reports (see below) are still welcome.
 
 **If it doesn't work**, the likely outcome is that USB audio on the Mac still doesn't work. The changed code only runs when a
 computer asks the mixer about its USB audio settings. The start-up code, the updater, the effects and the mixing are not touched.
@@ -278,7 +278,7 @@ patched `X1600FW.BIN`. Flashing differs from the DN-X1700: hold **MIC2** and **D
 "Ver. UP", then press **UTILITY**, then **MIDI CLK** (the page shows each step). On the Mac, set **PC/MAC** to **MAC** and
 power-cycle the mixer after changing it or the sample rate, as on the DN-X1700.
 
-**Please report back**, whether it worked or not: [open an issue](https://github.com/WhatMeansGithub/DN-X1700/issues) or reply in
+**Please report back** if you try it, whether it worked or not: [open an issue](https://github.com/WhatMeansGithub/DN-X1700/issues) or reply in
 the [Engine DJ community thread](https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550) with your Mac model and macOS version, whether the mixer shows up in Audio MIDI Setup as 8 in /
 8 out, playback and recording at 44.1, 48 and 96 kHz, and MIDI. Technical details: [docs/x1600.md](docs/x1600.md).
 
@@ -292,8 +292,8 @@ supported yet.
 | Path | What it is |
 |---|---|
 | `patches/` | The patches as data: offset, expected original bytes, new bytes, reason |
-| `site/` | The web tool (`index.html`, `patcher.js`, generated `patches.js`), the experimental DN-X1600 page (`x1600/`) and the tests for both (`test.mjs`, run with Node) |
-| `patches/x1600/`, `tools/models.py` | DN-X1600 patch data (experimental, untested on hardware) and per-model addresses; `gen_patch002.py`, `sim_patch002.py` and `build.py` take `--model X1600` |
+| `site/` | The web tool (`index.html`, `patcher.js`, generated `patches.js`), the DN-X1600 page (`x1600/`) and the tests for both (`test.mjs`, run with Node) |
+| `patches/x1600/`, `tools/models.py` | DN-X1600 patch data (confirmed by one owner) and per-model addresses; `gen_patch002.py`, `sim_patch002.py` and `build.py` take `--model X1600` |
 | `tools/x1700_patcher.py` | One-command program: downloads or loads the firmware, verifies, patches, optionally copies to the stick |
 | `tools/gen_site_data.py` | Generates the data used by the web tool and the program from `patches/*.yaml` (run it after changing a patch) |
 | `tools/build.py` | Applies patches only if the original matches byte for byte; fixes the updater checksum; writes image, diff and manifest |

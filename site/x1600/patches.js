@@ -3,7 +3,7 @@ globalThis.X1600_PATCHES = {
  "model": "DN-X1600",
  "fwName": "X1600FW.BIN",
  "size": 2097152,
- "untested": true,
+ "untested": false,
  "originalSha256": "befd35c43411b39e796656f12aa850badee49d677522ce5f7a5db504e346c120",
  "resultSha256": "ab8e1869bef4e36057d5752f9fcfafadad677e499cb6acd7f9ca2e6f3a883921",
  "patchSets": [

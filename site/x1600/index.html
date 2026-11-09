@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DN-X1600 Mac USB fix</title>
-<meta name="description" content="Experimental: patch your Denon DN-X1600 firmware so its USB audio works on current macOS. Not yet tested on a real DN-X1600. Runs entirely in your browser; your file is never uploaded.">
+<meta name="description" content="Patch your Denon DN-X1600 firmware so its USB audio works on current macOS. Confirmed working by one DN-X1600 owner. Runs entirely in your browser; your file is never uploaded.">
 <meta name="color-scheme" content="light dark">
 <style>
   :root {
@@ -135,6 +135,7 @@
   /* experimental notice */
   .untested { margin:28px 0 0; background:var(--warn-bg); border:1px solid var(--warn-line); border-radius:var(--radius); padding:18px 20px; }
   .untested h2 { font-size:1.15rem; color:var(--warn); margin-bottom:8px; }
+  .untested.confirmed { background:var(--ok-bg); border-color:var(--ok-line); } .untested.confirmed h2 { color:var(--ok); }
   .untested ul { margin:8px 0 12px; padding-left:20px; } .untested li { margin:4px 0; }
   .chip.exp { color:var(--warn); border-color:var(--warn-line); background:var(--warn-bg); }
   .chip.exp svg { stroke:var(--warn); }
@@ -176,7 +177,7 @@
     <p class="lead">Patch your mixer's firmware so USB audio and MIDI work with the built-in macOS driver: 8 in / 8 out, 24-bit, at 44.1, 48 or 96 kHz.
        It takes a few clicks, right here in your browser.</p>
     <div class="chips">
-      <span class="chip exp"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.01"/></svg> Experimental: not yet tested on a DN-X1600</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> Confirmed on a real DN-X1600 by one owner</span>
       <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> Nothing is uploaded</span>
       <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> No Denon code hosted here</span>
       <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> Free and open source</span>
@@ -185,10 +186,10 @@
 
   <noscript><div class="alert"><strong>JavaScript is off.</strong> This page needs JavaScript to patch the file. The README on GitHub shows other ways to do it.</div></noscript>
 
-  <section class="untested" role="note" aria-label="Not tested on hardware yet">
-    <h2>Not tested on a real DN-X1600 yet</h2>
-    <p>This is the same fix that makes the <a href="../">DN-X1700</a> work on current macOS, confirmed on a real DN-X1700. Nobody has flashed it on a DN-X1600 yet. You would be one of the first.</p>
-    <p><strong>Why it should work:</strong> Denon built the DN-X1600 firmware from the same code as the DN-X1700.</p>
+  <section class="untested confirmed" role="note" aria-label="Test status">
+    <h2>Confirmed by one DN-X1600 owner</h2>
+    <p>This is the same fix that makes the <a href="../">DN-X1700</a> work on current macOS, confirmed on a real DN-X1700. A DN-X1600 owner has flashed this version on a real unit and reported that it worked. That is one report so far, so please still treat it with care.</p>
+    <p><strong>Why it works:</strong> Denon built the DN-X1600 firmware from the same code as the DN-X1700.</p>
     <ul>
       <li>The USB description the mixer sends to the computer is byte for byte the same as the DN-X1700's.</li>
       <li>The faulty sample-rate code is the same, only at different addresses, and so is the updater and its checksum rule.</li>
@@ -196,7 +197,7 @@
     </ul>
     <p><strong>If it doesn't work</strong>, the most likely outcome is that USB audio on the Mac still doesn't work. The rest of the mixer should be unaffected: the changed code only runs when a computer asks the mixer about its USB audio settings, and the start-up code and the updater are not touched. You can go back by flashing Denon's original <code>X1600FW.BIN</code> the same way.</p>
     <p>The real risk is the same as with any firmware update: a power cut while the update is writing (see below). <strong>No guarantees</strong> of any kind.</p>
-    <p class="hint">Tried it? Please <a href="#report">report back</a>, whether it worked or not. Questions and discussion: the <a href="https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550">Engine DJ community thread</a>.</p>
+    <p class="hint">Tried it? Please <a href="#report">report back</a>, whether it worked or not: more reports help everyone. Questions and discussion: the <a href="https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550">Engine DJ community thread</a>.</p>
   </section>
 
   <section class="risk" role="note" aria-label="Warning">
@@ -207,7 +208,7 @@
       <ul>
         <li>The update <strong>erases the whole flash chip</strong>. If power is lost during the ~30 second write, the mixer won't start again and only an external flash programmer can recover it.</li>
         <li><strong>Your settings and presets will be reset</strong> to factory defaults. Write them down or photograph them first.</li>
-        <li>The fix is tested on one DN-X1700, with macOS 27 on Apple Silicon and with Windows. It is <strong>not tested on a DN-X1600</strong>. <a href="https://github.com/WhatMeansGithub/DN-X1700/blob/master/docs/x1600.md">Technical details</a>.</li>
+        <li>The fix is tested on one DN-X1700 (macOS 27 on Apple Silicon and Windows) and was <strong>reported working by one DN-X1600 owner</strong>. The author has no DN-X1600. <a href="https://github.com/WhatMeansGithub/DN-X1700/blob/master/docs/x1600.md">Technical details</a>.</li>
       </ul>
     </div>
   </section>
@@ -251,7 +252,7 @@
         <p class="placeholder" id="s3wait">Waiting for your firmware file in step 2.</p>
         <div id="s3ready" hidden>
           <label class="ack"><input type="checkbox" id="ack">
-            <span>I have read the warnings. I understand this fix has not been tested on a real DN-X1600, that flashing can permanently damage my mixer, that my settings will be reset, and that I alone am responsible for the outcome.</span></label>
+            <span>I have read the warnings. I understand this fix has been confirmed by only one DN-X1600 owner, that flashing can permanently damage my mixer, that my settings will be reset, and that I alone am responsible for the outcome.</span></label>
           <button class="btn big" id="dl" disabled>
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
             Download X1600FW.BIN</button>
@@ -297,7 +298,7 @@
       <div class="badge" aria-hidden="true"><span>5</span></div>
       <div class="step-body">
         <h2>Tell us how it went</h2>
-        <p>This is how the DN-X1600 version stops being experimental. Please <a href="https://github.com/WhatMeansGithub/DN-X1700/issues">open an issue on GitHub</a> (or reply in the <a href="https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550">thread on the Engine DJ community forum</a>), whether it worked or not, with:</p>
+        <p>One owner has confirmed this version; more reports make it more trustworthy. Please <a href="https://github.com/WhatMeansGithub/DN-X1700/issues">open an issue on GitHub</a> (or reply in the <a href="https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550">thread on the Engine DJ community forum</a>), whether it worked or not, with:</p>
         <ul>
           <li>Your Mac model and macOS version.</li>
           <li>Does <strong>DN-X1600</strong> show up in Audio MIDI Setup with 8 inputs and 8 outputs?</li>

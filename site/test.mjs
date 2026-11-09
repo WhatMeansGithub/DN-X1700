@@ -77,7 +77,7 @@ if (existsSync(p1600)) {
   throwsUser('X1700 firmware is refused by the X1600 page', () => X.buildImage(o1700, P1600));
   let wrongZip = false; try { await X.loadFirmware(new Uint8Array(py(`import zipfile,sys,io;b=io.BytesIO();z=zipfile.ZipFile(b,'w');z.write(sys.argv[1],'X1700FW.BIN');z.close();sys.stdout.buffer.write(b.getvalue())`, p1700)), P1600.fwName); } catch (e) { wrongZip = e instanceof X.UserError; }
   ok('X1700 zip dropped on the X1600 page gives a friendly error', wrongZip);
-  ok('X1600 data is marked untested', P1600.untested === true && P1600.fwName === 'X1600FW.BIN' && P1600.size === 0x200000);
+  ok('X1600 data is marked tested (confirmed by one owner)', P1600.untested === false && P1600.fwName === 'X1600FW.BIN' && P1600.size === 0x200000);
 } else console.log('\n(X1600 original not found, X1600 suite skipped)');
 
 if (existsSync(p600)) {
