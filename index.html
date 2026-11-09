@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DN-X1700 Mac USB fix</title>
+<meta name="description" content="Patch your Denon DN-X1700 firmware so its USB audio works on current macOS. Runs entirely in your browser; your file is never uploaded.">
+<meta name="color-scheme" content="light dark">
+<style>
+  :root {
+    --bg:#f5f6fa; --surface:#ffffff; --surface-2:#f0f2f8; --text:#13151d; --muted:#5a6072; --line:#e2e5ef;
+    --accent:#0e7490; --accent-strong:#0b5e75; --accent-soft:#e3f4f8; --on-accent:#ffffff;
+    --danger:#b42318; --danger-bg:#fef3f2; --danger-line:#f7c1bc;
+    --warn:#9a5b00; --warn-bg:#fff8eb; --warn-line:#f1d9a6;
+    --ok:#067647; --ok-bg:#ecfdf3; --ok-line:#a9e2c0;
+    --shadow:0 1px 2px rgba(16,24,40,.05), 0 8px 24px rgba(16,24,40,.06);
+    --radius:8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#0c0e13; --surface:#151821; --surface-2:#1c2030; --text:#eceef6; --muted:#9aa1b6; --line:#262b3b;
+      --accent:#2b8a9b; --accent-strong:#8ec9d3; --accent-soft:#12262b; --on-accent:#031418;
+      --danger:#ff8a80; --danger-bg:#2a1413; --danger-line:#5a2723;
+      --warn:#f0b955; --warn-bg:#271e0c; --warn-line:#5a4416;
+      --ok:#5ed39a; --ok-bg:#0f2519; --ok-line:#21573a;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  *, *::before, *::after { box-sizing:border-box; }
+  [hidden] { display:none !important; }                    /* so display:grid etc. never beats the hidden attribute */
+  html { -webkit-text-size-adjust:100%; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font:16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  a { color:var(--accent-strong); text-underline-offset:3px; }
+  p { margin:0 0 12px; } p:last-child { margin-bottom:0; }
+  h1, h2, h3 { margin:0; line-height:1.2; letter-spacing:-.01em; }
+  code { font:.88em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:var(--surface-2); border:1px solid var(--line);
+         border-radius:6px; padding:1px 6px; white-space:nowrap; }
+  .wrap { max-width:820px; margin:0 auto; padding:0 20px; }
+
+  /* top bar + hero */
+  .top { display:flex; align-items:center; justify-content:space-between; padding:18px 0; font-weight:600; }
+  .top a { font-weight:500; font-size:.92rem; text-decoration:none; color:var(--muted); }
+  .top a:hover { color:var(--text); }
+  .toplinks { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:4px 18px; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .logo { width:30px; height:30px; border-radius:6px; background:var(--accent); display:grid; place-items:center; }
+  .logo svg { width:18px; height:18px; stroke:var(--on-accent); }
+  .hero { padding:28px 0 8px; }
+  .hero h1 { font-size:clamp(2rem, 5vw, 2.9rem); font-weight:800; letter-spacing:-.03em; }
+  .hero h1 span { color:var(--accent-strong); }
+  .lead { font-size:1.1rem; color:var(--muted); max-width:60ch; margin-top:14px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+  .chip { display:inline-flex; align-items:center; gap:6px; font-size:.85rem; font-weight:600; color:var(--muted); background:var(--surface);
+          border:1px solid var(--line); border-radius:999px; padding:5px 12px; }
+  .chip svg { width:14px; height:14px; stroke:var(--ok); }
+
+  /* risk banner */
+  .risk { margin:28px 0 8px; background:var(--danger-bg); border:1px solid var(--danger-line); border-radius:var(--radius); padding:18px 20px; display:grid; grid-template-columns:28px 1fr; gap:14px; }
+  .risk svg { width:26px; height:26px; stroke:var(--danger); margin-top:2px; }
+  .risk h2 { font-size:1.05rem; color:var(--danger); margin-bottom:6px; }
+  .risk ul { margin:8px 0 0; padding-left:20px; } .risk li { margin:3px 0; }
+
+  /* steps */
+  .steps { list-style:none; margin:24px 0 0; padding:0; display:grid; gap:16px; }
+  .step { display:grid; grid-template-columns:44px minmax(0,1fr); gap:16px; background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); transition:border-color .2s, opacity .2s; }
+  .step.active { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft), var(--shadow); }
+  .step.locked { opacity:.6; box-shadow:none; }
+  .badge { width:44px; height:44px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:1.1rem;
+           background:var(--surface-2); color:var(--muted); border:1px solid var(--line); }
+  .active > .badge { background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+  .done > .badge { background:var(--ok); color:#fff; border-color:var(--ok); }
+  .done > .badge span { display:none; } .badge svg { display:none; width:22px; height:22px; stroke:#fff; } .done > .badge svg { display:block; }
+  .step-body h2 { font-size:1.25rem; margin:6px 0 10px; }
+  .hint { color:var(--muted); font-size:.93rem; }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; font:inherit; font-weight:700; padding:12px 20px; border-radius:6px;
+         border:1px solid var(--accent); background:var(--accent); color:var(--on-accent); cursor:pointer; text-decoration:none;
+         transition:transform .05s, background .15s; }
+  .btn:hover { background:var(--accent-strong); border-color:var(--accent-strong); } .btn:active { transform:translateY(1px); }
+  .btn svg { width:18px; height:18px; stroke:currentColor; }
+  .btn.secondary { background:transparent; color:var(--accent-strong); }
+  .btn.secondary:hover { background:var(--accent-soft); }
+  .btn[disabled] { opacity:.45; cursor:not-allowed; } .btn[disabled]:hover { background:var(--accent); }
+  .btn.big { padding:15px 26px; font-size:1.05rem; }
+  :focus-visible { outline:3px solid var(--accent); outline-offset:2px; border-radius:6px; }
+
+  /* drop zone */
+  .drop { display:grid; justify-items:center; gap:6px; text-align:center; padding:34px 16px; border:2px dashed var(--line); border-radius:8px;
+          background:var(--surface-2); cursor:pointer; transition:border-color .15s, background .15s; }
+  .drop:hover, .drop.over { border-color:var(--accent); background:var(--accent-soft); }
+  .drop svg { width:40px; height:40px; stroke:var(--accent); }
+  .drop strong { font-size:1.05rem; } .drop .hint { margin:0; }
+  .drop.busy { pointer-events:none; opacity:.75; }
+  .spinner { width:22px; height:22px; border:3px solid var(--line); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .alert { margin-top:14px; border-radius:6px; padding:14px 16px; border:1px solid var(--danger-line); background:var(--danger-bg); color:var(--text); }
+  .alert strong { color:var(--danger); }
+
+  /* verification checklist */
+  .checks { list-style:none; margin:16px 0 0; padding:0; display:grid; gap:8px; }
+  .checks li { display:grid; grid-template-columns:24px 1fr; gap:10px; align-items:start; opacity:0; transform:translateY(4px); animation:rise .35s ease forwards; }
+  .checks li:nth-child(2){animation-delay:.12s} .checks li:nth-child(3){animation-delay:.24s} .checks li:nth-child(4){animation-delay:.36s}
+  @keyframes rise { to { opacity:1; transform:none; } }
+  .checks svg { width:22px; height:22px; stroke:var(--ok); }
+  .filechip { display:inline-block; margin-top:12px; font-size:.9rem; color:var(--muted); }
+  .link-btn { background:none; border:0; color:var(--accent-strong); font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding:0; }
+
+  /* download */
+  .ack { display:grid; grid-template-columns:22px 1fr; gap:12px; align-items:start; padding:14px 16px; background:var(--warn-bg); border:1px solid var(--warn-line);
+         border-radius:6px; margin:0 0 16px; cursor:pointer; }
+  .ack input { width:20px; height:20px; margin:3px 0 0; accent-color:var(--accent); }
+  .placeholder { color:var(--muted); }
+  .hash { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; font-size:.88rem; color:var(--muted); }
+  .hash code { white-space:normal; word-break:break-all; }
+  .saved { margin-top:14px; }
+  details { margin-top:14px; border-top:1px solid var(--line); padding-top:12px; }
+  summary { cursor:pointer; font-weight:600; }
+  .tablewrap { overflow-x:auto; margin-top:10px; }
+  table { border-collapse:collapse; width:100%; font-size:.85rem; min-width:520px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; } th { color:var(--muted); font-weight:600; }
+  td code { white-space:normal; word-break:break-all; }
+  td:first-child code { white-space:nowrap; word-break:normal; }   /* keep offsets on one line */   /* long byte strings (patch 002 is 148 bytes) wrap instead of making the table thousands of px wide */
+
+  /* flashing instructions */
+  .flash { counter-reset:f; list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+  .flash li { counter-increment:f; display:grid; grid-template-columns:28px minmax(0,1fr); gap:12px; }
+  .flash li::before { content:counter(f); width:28px; height:28px; border-radius:50%; background:var(--accent-soft); color:var(--accent-strong); font-weight:800; font-size:.85rem; display:grid; place-items:center; margin-top:1px; }
+  kbd { font:600 .82em ui-monospace, SFMono-Regular, Menlo, monospace; background:var(--surface-2); border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:1px 7px; white-space:nowrap; }
+  .callout { margin:14px 0 0; border-radius:6px; padding:14px 16px; border:1px solid var(--line); background:var(--surface-2); }
+  .callout.warn { background:var(--warn-bg); border-color:var(--warn-line); }
+  .callout.ok { background:var(--ok-bg); border-color:var(--ok-line); }
+  .callout > strong:first-child { display:block; margin-bottom:2px; }
+
+  footer { color:var(--muted); font-size:.88rem; padding:32px 0 56px; }
+  noscript .alert { margin:20px 0; }
+
+  @media (max-width: 560px) {
+    .wrap { padding:0 14px; }
+    .step { grid-template-columns:minmax(0,1fr); gap:10px; padding:16px; }   /* minmax: wide content scrolls inside, never widens the page */
+    .badge { width:34px; height:34px; font-size:.95rem; }
+    .done > .badge svg { width:18px; height:18px; }
+    .risk { grid-template-columns:1fr; gap:8px; } .btn { width:100%; }
+    .drop { padding:26px 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } .checks li { opacity:1; transform:none; } }
+  /* Wide screens: same linear page, but use the width so there is much less scrolling. */
+  .hero h1 span { color:var(--accent-strong); }
+  @media (min-width: 900px) {
+    body { font-size:17px; }
+    .wrap { max-width:1120px; padding:0 32px; }
+    .hero { padding:18px 0 4px; }
+    .hero h1 { font-size:clamp(2.2rem, 3.6vw, 3rem); }
+    .lead { max-width:82ch; margin-top:10px; }
+    .chips { margin-top:14px; }
+    .risk { margin:20px 0 4px; padding:16px 22px; grid-template-columns:30px 1fr; }
+    .risk ul { list-style:none; padding:0; margin:10px 0 0; display:grid; grid-template-columns:repeat(auto-fit, minmax(270px, 1fr)); gap:10px 14px; }
+    .risk li { margin:0; padding:10px 14px; background:rgba(127,127,127,.09); border-radius:6px; font-size:.95rem; line-height:1.5; }
+    .untested { padding:16px 22px; }
+    .steps { margin-top:18px; gap:12px; }
+    .step { padding:18px 22px; gap:18px; }
+    .drop { padding:22px 16px; }
+    .flash li > div, .step-body > p, .step-body .callout { max-width:96ch; }
+  }
+  .learn { margin:16px 0 0; }
+  /* Donate (Ko-fi). Pink + heart: a colour no other element on this page uses (red = danger, amber = warning, blue = main action).
+     Desktop: a quiet outlined pill is always visible bottom-right.
+     Mobile: no floating button (it would cover the flashing instructions); a plain link sits in the header instead. */
+  :root { --donate:#b8297f; --donate-fill:#d6338f; --donate-fill-hover:#bd2a7c; --donate-soft:#fdf0f7; }
+  @media (prefers-color-scheme: dark) { :root { --donate:#f48cc8; --donate-soft:#2a1424; } }
+  .donate-link { display:none; align-items:center; gap:5px; color:var(--donate) !important; font-weight:700; text-decoration:none !important; }
+  .donate-link svg { width:14px; height:14px; fill:currentColor; }
+  .donate-float { position:fixed; right:20px; bottom:20px; z-index:50; display:inline-flex; align-items:center; gap:7px; padding:9px 16px;
+                  border-radius:999px; border:1.5px solid var(--donate); background:var(--surface); color:var(--donate) !important; font-weight:700;
+                  text-decoration:none !important; box-shadow:var(--shadow); }
+  .donate-float:hover { background:var(--donate-soft); }
+  .donate-float svg { width:15px; height:15px; fill:currentColor; }
+  @media (max-width: 640px) { .donate-link { display:inline-flex; } .donate-float { display:none; } }
+  .donate { margin-top:18px; padding:18px 20px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); text-align:center; }
+  .donate h3 { margin:0 0 6px; font-size:1.1rem; }
+  .donate p { margin:0 0 14px; color:var(--muted); }
+  .donate .kofi-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:15px 30px; border-radius:6px; background:var(--donate-fill); color:#fff; font-weight:800; font-size:1.1rem; text-decoration:none; }
+  .donate .kofi-btn:hover { background:var(--donate-fill-hover); }
+  .donate .kofi-btn svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .donate .sub { margin:12px 0 0; font-size:.92rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h3l2-6 4 12 2-6h5"/></svg></span> DN-X1700 Mac USB fix</div>
+    <nav class="toplinks"><a class="donate-link" href="https://ko-fi.com/whatmeansgithub" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2 0 3.6 1.1 5 2.9 1.4-1.8 3-2.9 5-2.9 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg> Donate</a><a href="x1600/">DN-X1600 version</a><a href="https://github.com/WhatMeansGithub/DN-X1700">Source on GitHub</a></nav>
+  </header>
+
+  <section class="hero">
+    <h1>Make your DN-X1700 <span>work with modern Macs</span></h1>
+    <p class="lead">Patch your mixer's firmware so USB audio and MIDI work with the built-in macOS driver: 8 in / 8 out, 24-bit, at 44.1, 48 or 96 kHz.
+       It takes a few clicks, right here in your browser.</p>
+    <div class="chips">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> Nothing is uploaded</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> No Denon code hosted here</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> Free and open source</span>
+    </div>
+  </section>
+
+  <div class="learn"><a class="btn secondary" href="https://github.com/WhatMeansGithub/DN-X1700#how-it-works" target="_blank" rel="noopener">Learn more about the firmware patch <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a></div>
+
+  <p class="hint" style="margin-top:14px">Have a <strong>DN-X1600</strong>? There is a <a href="x1600/">version for the DN-X1600</a>, confirmed working by one owner.</p>
+
+  <noscript><div class="alert"><strong>JavaScript is off.</strong> This page needs JavaScript to patch the file. The README on GitHub shows other ways to do it.</div></noscript>
+
+  <section class="risk" role="note" aria-label="Warning">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.01"/></svg>
+    <div>
+      <h2>Flashing firmware can permanently destroy your mixer</h2>
+      <p>You do this at your own risk. This project is provided as is, <strong>without warranty, and its author accepts no responsibility</strong> for bricked mixers or any other damage.</p>
+      <ul>
+        <li>The update <strong>erases the whole flash chip</strong>. If power is lost during the ~30 second write, the mixer won't start again and only an external flash programmer can recover it.</li>
+        <li><strong>Your settings and presets will be reset</strong> to factory defaults. Write them down or photograph them first.</li>
+        <li>Tested on one unit, with macOS 27 on Apple Silicon and with Windows. <a href="https://github.com/WhatMeansGithub/DN-X1700#readme">Read the full README</a>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <ol class="steps">
+
+    <li class="step active" id="s1">
+      <div class="badge" aria-hidden="true"><span>1</span><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></div>
+      <div class="step-body">
+        <h2>Get Denon's official firmware</h2>
+        <p>Download Denon's v2.000 firmware, a small zip file, straight from Denon's own server.</p>
+        <p><a class="btn" href="https://cdn.inmusicbrands.com/denondj/legacy/dnx1700/firmware-dnx1700-v2000.zip">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+          Download from Denon</a></p>
+        <p class="hint">You don't need to unzip it. This page can't fetch it for you because Denon's server doesn't allow that.</p>
+      </div>
+    </li>
+
+    <li class="step" id="s2">
+      <div class="badge" aria-hidden="true"><span>2</span><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></div>
+      <div class="step-body">
+        <h2>Add the file</h2>
+        <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose or drop the firmware file">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V5M7 9l5-5 5 5M4 15v4a1 1 0 001 1h14a1 1 0 001-1v-4"/></svg>
+          <strong id="droptitle">Drop the firmware file here</strong>
+          <p class="hint">or click to choose <code>firmware-dnx1700-v2000.zip</code> (or <code>X1700FW.BIN</code>)</p>
+        </div>
+        <input id="file" type="file" hidden accept=".zip,.bin,.BIN">
+        <div id="msg" aria-live="polite"></div>
+        <div id="verified" hidden>
+          <ul class="checks" id="checks"></ul>
+          <p class="filechip"><span id="fname"></span> &middot; <button class="link-btn" id="again" type="button">choose a different file</button></p>
+        </div>
+      </div>
+    </li>
+
+    <li class="step locked" id="s3">
+      <div class="badge" aria-hidden="true"><span>3</span><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></div>
+      <div class="step-body">
+        <h2>Download the patched firmware</h2>
+        <p class="placeholder" id="s3wait">Waiting for your firmware file in step 2.</p>
+        <div id="s3ready" hidden>
+          <label class="ack"><input type="checkbox" id="ack">
+            <span>I have read the warning. I understand this can permanently damage my mixer, that my settings will be reset, and that I alone am responsible for the outcome.</span></label>
+          <button class="btn big" id="dl" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
+            Download X1700FW.BIN</button>
+          <div class="callout ok saved" id="saved" hidden><strong>Saved as X1700FW.BIN.</strong> Keep that exact name, and copy it to the root of your USB stick in the next step.</div>
+          <div class="hash">SHA-256: <code id="sha"></code> <button class="link-btn" id="copy" type="button">copy</button></div>
+          <details><summary>What was changed (<span id="nchanges"></span>)</summary>
+            <div class="tablewrap"><table id="changes"><thead><tr><th>Offset</th><th>Was</th><th>Now</th><th>Why</th></tr></thead><tbody></tbody></table></div>
+          </details>
+        </div>
+      </div>
+    </li>
+
+    <li class="step" id="s4">
+      <div class="badge" aria-hidden="true"><span>4</span></div>
+      <div class="step-body">
+        <h2>Flash it with Denon's updater</h2>
+        <ol class="flash">
+          <li><div>Copy <code>X1700FW.BIN</code> to the <strong>root</strong> of a <strong>FAT32</strong> USB stick (MBR partition table; a small stick is safest). Keep the name exactly as it is.</div></li>
+          <li><div>Mixer <strong>off</strong>. Plug the stick into the <strong>rear USB-A</strong> port.</div></li>
+          <li><div>Hold <kbd>MIC2</kbd> and <kbd>DUCKING</kbd>, switch the mixer <strong>on</strong>, and keep holding until the display says <strong>Version UP Mode</strong>.</div></li>
+          <li><div>Press <kbd>Master EFX INS 1</kbd>. The display shows <strong>Version UP execute?</strong> and <strong>Ver.2000 &gt;&gt;&gt; Ver.2000</strong> (the version number doesn't change).
+              <span class="hint"> To cancel safely, switch the mixer off here: nothing has been written yet.</span></div></li>
+          <li><div>Press <kbd>Master EFX INS 2</kbd>. <strong>Don't touch anything</strong> until the display says <strong>Version UP complete! Shut the power OFF</strong> (about 30 seconds). Use stable mains power.</div></li>
+          <li><div>Switch the mixer off and on again, then re-enter your settings.</div></li>
+        </ol>
+        <div class="callout warn"><strong>Then, set it up for the Mac</strong>
+          In the Utility menu, System Setting: set <kbd>PC/MAC</kbd> to <strong>MAC</strong>, USB mode to <strong>USB B</strong>, and pick the sampling frequency (44.1, 48 or 96 kHz).
+          <strong>Power-cycle the mixer</strong>, and do so again every time you change PC/MAC or the sample rate. macOS follows the mixer's rate by itself.</div>
+        <details><summary>If something goes wrong</summary>
+          <p style="margin-top:10px">If an error code appears on the display, write it down and don't switch the mixer off straight away: the updater retries by itself.
+          To go back to the original firmware, flash Denon's original <code>X1700FW.BIN</code> the same way. If the mixer shows nothing at power-up after an update, the flash chip needs reprogramming with an external programmer; see the <a href="https://github.com/WhatMeansGithub/DN-X1700#if-it-does-not-start">README</a>.</p>
+        </details>
+        <div class="donate" id="donateCard">
+          <h3>Did it work?</h3>
+          <p>This tool is free and made in spare time. If it saved you a headache, a coffee helps keep it maintained.</p>
+          <a class="kofi-btn" href="https://ko-fi.com/whatmeansgithub" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h13v6a5 5 0 01-5 5H9a5 5 0 01-5-5V8z"/><path d="M17 10h1.5a2.5 2.5 0 010 5H17M8 3v2M12 3v2"/></svg> Buy me a coffee</a>
+          <p class="sub"><a href="https://github.com/WhatMeansGithub/DN-X1700/issues/new" target="_blank" rel="noopener">Tell me how it went</a>: a confirmation from another owner helps everyone.</p>
+        </div>
+      </div>
+    </li>
+  </ol>
+
+  <footer>
+    <p>Free software, GPL-3.0-or-later. Not affiliated with Denon DJ or inMusic. This page contains no Denon code: it applies a small set of byte changes to a file you download from Denon, on your own computer.
+       <a href="https://github.com/WhatMeansGithub/DN-X1700">Source and documentation on GitHub</a>.</p>
+  </footer>
+</div>
+
+<script src="patches.js"></script>
+<script src="patcher.js"></script>
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const drop = $('drop'), input = $('file'), msg = $('msg'), ack = $('ack'), dl = $('dl');
+  const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  let patched = null, url = null, started = false, stage = 'waiting';   // started: the user has been to Denon's download or added a file
+
+  function setSteps(next) {             // next: 'waiting' | 'verified'
+    stage = next;
+    const v = stage === 'verified';
+    $('s1').className = 'step ' + (started ? 'done' : 'active');
+    $('s2').className = 'step ' + (v ? 'done' : (started ? 'active' : ''));
+    $('s3').className = 'step ' + (v ? 'active' : 'locked');
+    $('s3wait').hidden = v; $('s3ready').hidden = !v;
+    $('verified').hidden = !v; drop.hidden = v;
+  }
+  $('s1').querySelector('a.btn').addEventListener('click', () => { started = true; setSteps(stage); });
+
+  function reset() {
+    patched = null; ack.checked = false; dl.disabled = true; $('saved').hidden = true; msg.innerHTML = ''; input.value = '';
+    drop.classList.remove('busy'); $('droptitle').textContent = 'Drop the firmware file here';
+    setSteps('waiting');
+  }
+
+  async function handle(file) {
+    if (!file) return;
+    reset(); started = true;
+    drop.classList.add('busy'); $('droptitle').innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:-5px;margin-right:8px"></span>Checking ' + esc(file.name) + ' ...';
+    let result;
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const fw = await X1700.loadFirmware(bytes);
+      await new Promise((r) => setTimeout(r, 60));                    // let the "checking" state paint before hashing
+      result = X1700.buildImage(fw, X1700_PATCHES);
+    } catch (e) {
+      drop.classList.remove('busy'); $('droptitle').textContent = 'Drop the firmware file here';
+      const friendly = e instanceof X1700.UserError;
+      msg.innerHTML = '<div class="alert"><strong>' + (friendly ? 'This file can\'t be used.' : 'Something went wrong.') + '</strong> ' + esc(e.message) +
+        (friendly ? '<br><span class="hint">Use the firmware from step 1, exactly as downloaded. Files that were already patched, or modified, are refused on purpose.</span>' : '') + '</div>';
+      return;
+    }
+    patched = result;
+    drop.classList.remove('busy'); $('droptitle').textContent = 'Drop the firmware file here';
+    const sets = X1700_PATCHES.patchSets.length;
+    $('checks').innerHTML = [
+      'Recognised the original Denon v2.000 firmware (4,194,304 bytes), byte for byte.',
+      'Applied ' + sets + ' patches (' + result.changes.length + ' byte changes).',
+      'Fixed the updater checksum so the mixer accepts the file.',
+      'Checked the result against the reference build (sha256 ' + result.sha256.slice(0, 8) + '...).'
+    ].map((t) => '<li>' + CHECK + '<span>' + t + '</span></li>').join('');
+    $('fname').textContent = file.name;
+    $('sha').textContent = result.sha256;
+    $('nchanges').textContent = result.changes.length + ' changes and the checksum word';
+    const rows = result.changes.map((c) => '<tr><td><code>0x' + c.offset.toString(16) + '</code></td><td><code>' + c.old + '</code></td><td><code>' + c.new + '</code></td><td>' + esc(c.reason) + '</td></tr>');
+    rows.push('<tr><td><code>0x3ffffc</code></td><td><code>' + result.checksumWord.old + '</code></td><td><code>' + result.checksumWord.new + '</code></td><td>Updater checksum word. The updater refuses images whose checksum is wrong.</td></tr>');
+    document.querySelector('#changes tbody').innerHTML = rows.join('');
+    setSteps('verified');
+    $('s3').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  }
+
+  ack.addEventListener('change', () => { dl.disabled = !(ack.checked && patched); });
+  dl.addEventListener('click', () => {
+    if (!patched || !ack.checked) return;
+    if (url) URL.revokeObjectURL(url);
+    url = URL.createObjectURL(new Blob([patched.image], { type: 'application/octet-stream' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = 'X1700FW.BIN'; document.body.appendChild(a); a.click(); a.remove();
+    $('saved').hidden = false; $('s4').classList.add('active');
+  });
+  $('copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(patched.sha256); $('copy').textContent = 'copied'; setTimeout(() => { $('copy').textContent = 'copy'; }, 1500); } catch (e) { /* ignore */ } });
+  $('again').addEventListener('click', reset);
+
+  drop.addEventListener('click', () => input.click());
+  drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
+  input.addEventListener('change', () => handle(input.files[0]));
+  ['dragenter', 'dragover'].forEach((t) => window.addEventListener(t, (e) => { e.preventDefault(); if (!drop.hidden) drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach((t) => window.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+  window.addEventListener('drop', (e) => { const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) handle(f); });   // drop anywhere on the page
+  setSteps('waiting');
+})();
+</script>
+<a class="donate-float" id="donateFloat" href="https://ko-fi.com/whatmeansgithub" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 7.9 3.6 4.5 7 4.5c2 0 3.6 1.1 5 2.9 1.4-1.8 3-2.9 5-2.9 3.4 0 5.6 3.4 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg> Donate</a>
+</body>
+</html>
