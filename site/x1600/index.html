@@ -135,7 +135,6 @@
   /* experimental notice */
   .untested { margin:28px 0 0; background:var(--warn-bg); border:1px solid var(--warn-line); border-radius:var(--radius); padding:18px 20px; }
   .untested h2 { font-size:1.15rem; color:var(--warn); margin-bottom:8px; }
-  .untested.confirmed { background:var(--ok-bg); border-color:var(--ok-line); } .untested.confirmed h2 { color:var(--ok); }
   .untested ul { margin:8px 0 12px; padding-left:20px; } .untested li { margin:4px 0; }
   .chip.exp { color:var(--warn); border-color:var(--warn-line); background:var(--warn-bg); }
   .chip.exp svg { stroke:var(--warn); }
@@ -170,6 +169,7 @@
     .drop { padding:22px 16px; }
     .flash li > div, .step-body > p, .step-body .callout { max-width:96ch; }
   }
+  .learn { margin:16px 0 0; }
   /* Donate (Ko-fi). Pink + heart: a colour no other element on this page uses (red = danger, amber = warning, blue = main action).
      Desktop: a quiet outlined pill is always visible bottom-right.
      Mobile: no floating button (it would cover the flashing instructions); a plain link sits in the header instead. */
@@ -212,21 +212,9 @@
     </div>
   </section>
 
-  <noscript><div class="alert"><strong>JavaScript is off.</strong> This page needs JavaScript to patch the file. The README on GitHub shows other ways to do it.</div></noscript>
+  <div class="learn"><a class="btn secondary" href="https://github.com/WhatMeansGithub/DN-X1700#dn-x1600-confirmed-by-one-owner" target="_blank" rel="noopener">Learn more about the firmware patch <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></a></div>
 
-  <section class="untested confirmed" role="note" aria-label="Test status">
-    <h2>Confirmed by one DN-X1600 owner</h2>
-    <p>This is the same fix that makes the <a href="../">DN-X1700</a> work on current macOS, confirmed on a real DN-X1700. A DN-X1600 owner has flashed this version on a real unit and reported that it worked. That is one report so far, so please still treat it with care.</p>
-    <p><strong>Why it works:</strong> Denon built the DN-X1600 firmware from the same code as the DN-X1700.</p>
-    <ul>
-      <li>The USB description the mixer sends to the computer is byte for byte the same as the DN-X1700's.</li>
-      <li>The faulty sample-rate code is the same, only at different addresses, and so is the updater and its checksum rule.</li>
-      <li>The same checks that the working DN-X1700 firmware passed were run on this one, and all passed: every changed address is checked against the original file, the patched code was run in a simulator at 44.1, 48 and 96 kHz, and the result is verified against a reference build.</li>
-    </ul>
-    <p><strong>If it doesn't work</strong>, the most likely outcome is that USB audio on the Mac still doesn't work. The rest of the mixer should be unaffected: the changed code only runs when a computer asks the mixer about its USB audio settings, and the start-up code and the updater are not touched. You can go back by flashing Denon's original <code>X1600FW.BIN</code> the same way.</p>
-    <p>The real risk is the same as with any firmware update: a power cut while the update is writing (see below). <strong>No guarantees</strong> of any kind.</p>
-    <p class="hint">Tried it? Please <a href="#report">report back</a>, whether it worked or not: more reports help everyone. Questions and discussion: the <a href="https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550">Engine DJ community thread</a>.</p>
-  </section>
+  <noscript><div class="alert"><strong>JavaScript is off.</strong> This page needs JavaScript to patch the file. The README on GitHub shows other ways to do it.</div></noscript>
 
   <section class="risk" role="note" aria-label="Warning">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.01"/></svg>
