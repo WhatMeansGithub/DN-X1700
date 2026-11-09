@@ -212,9 +212,6 @@ the updater retries a few times on its own. If it ends in an error, the flash ma
 - **Power-cycle required** after changing PC/MAC or the sample rate (otherwise skipping audio).
 - **No volume slider** in macOS (no volume controls in the device).
 - **Audio Start:** when audio starts, macOS waits a fraction of a second for the mixer to begin sending; this is normal.
-- **Effects display lag (unverified).** One tester noticed the mixer's effects controls and display feeling less responsive while
-  USB audio is active, in PC mode as well as Mac mode. It is not known whether the stock firmware behaves the same way, and
-  it has not been measured. If you can compare against an unpatched mixer, please report it.
 - Lowercase commands on the internal service serial port no longer work (patch code location).
 - Audio MIDI Setup may list 44.1 kHz even when the mixer runs 48 or 96 kHz; leave the rate alone.
 - Only one unit and one Mac/Windows setup have been tested. Patch 003 (added later) was checked on the Mac with Ableton and on an
