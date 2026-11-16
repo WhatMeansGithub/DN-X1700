@@ -13,6 +13,7 @@ import { createHash } from 'node:crypto';
 const require = createRequire(import.meta.url);
 const X = require('./patcher.js');
 require('./patches.js');
+require('./patches-filter.js');
 require('./x1600/patches.js');
 require('./x600/patches.js');
 X.setInflate(async (d) => new Uint8Array(inflateRawSync(d)));
@@ -70,6 +71,24 @@ for (const n of [0, 1, 55, 56, 63, 64, 65, 1000, o1700.length]) {
 const p600 = process.argv[4] || new URL('../firmware/original/X600FW.BIN', import.meta.url).pathname;
 const P1700 = globalThis.X1700_PATCHES, P1600 = globalThis.X1600_PATCHES, P600 = globalThis.X600_PATCHES;
 await suite('X1700', P1700, p1700, 'X1700FW.BIN', 'firmware-dnx1700-v2000', 0x400000);
+
+// Filter edition (same page, second patch set): USB fix + menu control of the Parameters filter
+{
+  console.log('\n== X1700 filter edition');
+  const PF = globalThis.X1700_FILTER_PATCHES;
+  const rf = X.buildImage(o1700, PF);
+  ok('filter: result sha256 equals reference build', rf.sha256 === PF.resultSha256, rf.sha256.slice(0, 16));
+  ok('filter: updater integrity rule holds', X.integrityOk(rf.image, PF));
+  ok('filter: USB patches first, then filter-menu', PF.patchSets.join() === P1700.patchSets.concat(['101-filter-menu']).join(), PF.patchSets.join());
+  ok('filter: differs from the USB-only result', rf.sha256 !== P1700.resultSha256);
+  ok('filter: 14 patch entries + new checksum word', rf.changes.length === 14 && rf.checksumWord.new !== rf.checksumWord.old, String(rf.changes.length));
+  ok('filter: Denon DSP package (0x1041A8..0x11FFC8) untouched', X.sha256(rf.image.subarray(0x1041A8, 0x11FFC8)) === X.sha256(o1700.subarray(0x1041A8, 0x11FFC8)));
+  const touched = new Set(); for (const c of rf.changes.filter((c) => c.patch === '101-filter-menu')) for (let i = 0; i < c.new.length / 2; i++) touched.add(c.offset + i);
+  ok('filter: its patches only touch free flash after the application and one pointer', [...touched].every((o) => (o >= 0xD3A00 && o < 0x100000) || (o >= 0x16C00 && o < 0x16C04)));
+  throwsUser('filter: modified firmware is refused', () => { const t = o1700.slice(); t[0x20000] ^= 1; X.buildImage(t, PF); });
+  throwsUser('filter: already patched firmware is refused', () => X.buildImage(rf.image, PF));
+  throwsUser('filter: USB-only result is refused as input', () => X.buildImage(X.buildImage(o1700, P1700).image, PF));
+}
 if (existsSync(p1600)) {
   const o1600 = await suite('X1600', P1600, p1600, 'X1600FW.BIN', 'firmware-dnx1600-v2000', 0x200000);
   console.log('\n== cross-model');

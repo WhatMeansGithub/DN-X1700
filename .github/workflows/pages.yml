@@ -39,14 +39,16 @@ jobs:
       - name: Web tool data matches the patch files
         run: |
           python tools/gen_site_data.py
-          git diff --exit-code -- site/patches.js site/x1600/patches.js patches/patches.json
+          git diff --exit-code -- site/patches.js site/patches-filter.js site/x1600/patches.js patches/patches.json patches/patches-filter.json
       - name: X1600 patch 002 regenerates identically and passes the simulator
         run: |
           python tools/gen_patch002.py --model X1600
           git diff --exit-code -- patches/x1600
           python tools/sim_patch002.py --model X1600
       - name: Program builds the reference image
-        run: python tools/x1700_patcher.py --yes --file fw.zip --out out
+        run: |
+          python tools/x1700_patcher.py --yes --file fw.zip --out out
+          python tools/x1700_patcher.py --filter --yes --file fw.zip --out out-filter
       - name: Web patcher tests
         run: node site/test.mjs firmware/original/X1700FW.BIN firmware/original/X1600FW.BIN
 
@@ -61,7 +63,7 @@ jobs:
       - name: Publish only the page files
         run: |
           mkdir -p _site/x1600
-          cp site/index.html site/patcher.js site/patches.js _site/
+          cp site/index.html site/patcher.js site/patches.js site/patches-filter.js _site/
           cp site/x1600/index.html site/x1600/patches.js _site/x1600/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

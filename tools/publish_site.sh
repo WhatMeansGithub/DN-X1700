@@ -20,7 +20,7 @@ SRC=$(git -C "$ROOT" rev-parse --short HEAD)
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/x1600" "$TMP/x600"
-for f in index.html patcher.js dnflash.js patches.js x1600/index.html x1600/patches.js x600/index.html x600/patches.js; do cp "$ROOT/site/$f" "$TMP/$f"; done
+for f in index.html patcher.js dnflash.js patches.js patches-filter.js x1600/index.html x1600/patches.js x600/index.html x600/patches.js; do cp "$ROOT/site/$f" "$TMP/$f"; done
 touch "$TMP/.nojekyll"                                   # serve the files as they are, no Jekyll processing
 
 git -C "$TMP" init -q -b gh-pages

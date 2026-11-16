@@ -35,6 +35,8 @@ ap.add_argument("--model", default="X1700")
 ap.add_argument("--patches", nargs="*")
 ap.add_argument("--date", default=datetime.date.today().isoformat())
 ap.add_argument("--allow-boot", action="store_true")
+ap.add_argument("--extra-dir", action="append", default=[],
+                help="also apply every NNN-*.yaml in this folder after the model patches (local experiments)")
 a = ap.parse_args()
 
 M = models.get(a.model)
@@ -51,6 +53,9 @@ if a.patches is not None:
     missing = set(want) - {f.stem.split("-", 1)[1] for f in files} - {f.stem for f in files}
     if missing:
         sys.exit(f"unknown patch(es): {sorted(missing)}")
+
+for d_ in a.extra_dir:
+    files += sorted(pathlib.Path(d_).glob("[0-9][0-9][0-9]-*.yaml"))
 
 img = bytearray(orig)
 touched, applied = [], []

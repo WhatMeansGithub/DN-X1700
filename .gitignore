@@ -22,3 +22,12 @@ docs/roadmap.md
 # Denon firmware downloads for other models (zips, unpacked updaters, PDFs): local only
 X1600 Firmware/
 X600 Firmware/
+
+# Private filter research (the published Filter edition is patches/filter/101-filter-menu.yaml and tools/gen_filter_menu.py)
+patches/filter/old/
+tools/gen_filter_curve.py
+docs/filter-private.md
+tools/gen_filter_res.py
+tools/gen_dsp_filter.py
+tools/gen_res_proof.py
+tools/gen_res_live.py

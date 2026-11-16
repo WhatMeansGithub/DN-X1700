@@ -112,6 +112,13 @@
          border-radius:6px; margin:0 0 16px; cursor:pointer; }
   .ack input { width:20px; height:20px; margin:3px 0 0; accent-color:var(--accent); }
   .placeholder { color:var(--muted); }
+  .edition { border:1px solid var(--line); border-radius:6px; padding:10px 14px 6px; margin:0 0 16px; background:var(--surface-2); }
+  .edition legend { padding:0 6px; font-weight:700; }
+  .edition label { display:grid; grid-template-columns:22px 1fr; gap:10px; padding:8px 0; cursor:pointer; }
+  .edition input { width:20px; height:20px; margin:3px 0 0; accent-color:var(--accent); }
+  .edition .tag { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--warn); margin-left:6px; }
+  .edition label.off { opacity:.55; cursor:not-allowed; }
+  .rows { margin:8px 0 0; padding-left:20px; } .rows li { margin:4px 0; }
   .hash { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; font-size:.88rem; color:var(--muted); }
   .hash code { white-space:normal; word-break:break-all; }
   .saved { margin-top:14px; }
@@ -209,6 +216,8 @@
 
   <p class="hint" style="margin-top:14px">Have a <strong>DN-X1600</strong>? There is a <a href="x1600/">version for the DN-X1600</a>, confirmed working by one owner.</p>
 
+  <p class="hint">New and optional: a <strong>Filter edition</strong> that adds resonance, gate and range settings for the Parameters filter to the Utility menu. You choose it in step 3; the USB fix alone stays the default.</p>
+
   <noscript><div class="alert"><strong>JavaScript is off.</strong> This page needs JavaScript to patch the file. The README on GitHub shows other ways to do it.</div></noscript>
 
   <section class="risk" role="note" aria-label="Warning">
@@ -262,6 +271,24 @@
         <h2>Download the patched firmware</h2>
         <p class="placeholder" id="s3wait">Waiting for your firmware file in step 2.</p>
         <div id="s3ready" hidden>
+          <fieldset class="edition" id="edition">
+            <legend>Choose your firmware</legend>
+            <label><input type="radio" name="edition" value="usb" checked>
+              <span><strong>USB fix only</strong> <span class="hint">(recommended)</span><br>
+              Denon's v2.000 with the USB audio and MIDI fix for macOS. The tested default.</span></label>
+            <label id="filterlabel"><input type="radio" name="edition" value="filter">
+              <span><strong>USB fix + Filter edition</strong> <span class="tag">experimental</span><br>
+              The same fix, plus extra settings for the Parameters filter in the Utility menu.</span></label>
+          </fieldset>
+          <div class="callout warn" id="filterinfo" hidden>
+            <strong>Filter edition: new rows in Utility &rarr; Parameters Filter Setting</strong>
+            <ul class="rows">
+              <li><strong>LPF Reso</strong> and <strong>HPF Reso</strong>: resonance of the low-pass and the high-pass side, 0 to 100 %. Defaults 28 % and 22 % (Denon's stock is about 52 %: a cleaner filter).</li>
+              <li><strong>HPF Gate</strong>: where the high-pass resonance starts, Off or 100 to 1000 Hz (default 400 Hz). Below it the high-pass has no resonance, so the bass is not boosted.</li>
+              <li><strong>HPF Range</strong>: how the high-pass knob sweeps. Stock (Denon's curve) or 20 Hz at the centre, the chosen frequency (150 Hz to 2.5 kHz) at half travel, 20 kHz at the end. Default 20-600.</li>
+            </ul>
+            <p style="margin-top:10px">Values are saved with your settings (and in Preset Export/Import) and apply when you leave Utility and move the Parameter knob. Experimental: tested by one owner on one unit. It adds a small program that runs in RAM while the mixer is on; nothing in Denon's DSP is changed. Version UP Mode is unaffected, so you can always flash the USB-only version back. <a href="https://github.com/WhatMeansGithub/DN-X1700/blob/master/docs/filter-edition.md" target="_blank" rel="noopener">Details</a>.</p>
+          </div>
           <label class="ack"><input type="checkbox" id="ack">
             <span>I have read the warning. I understand this can permanently damage my mixer, that my settings will be reset, and that I alone am responsible for the outcome.</span></label>
           <button class="btn big" id="dl" disabled>
@@ -313,6 +340,7 @@
 </div>
 
 <script src="patches.js"></script>
+<script src="patches-filter.js"></script>
 <script src="patcher.js"></script>
 <script>
 (function () {
@@ -321,7 +349,7 @@
   const drop = $('drop'), input = $('file'), msg = $('msg'), ack = $('ack'), dl = $('dl');
   const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  let patched = null, url = null, started = false, stage = 'waiting';   // started: the user has been to Denon's download or added a file
+  let patched = null, results = null, edition = 'usb', url = null, started = false, stage = 'waiting';   // started: the user has been to Denon's download or added a file
 
   function setSteps(next) {             // next: 'waiting' | 'verified'
     stage = next;
@@ -335,10 +363,32 @@
   $('s1').querySelector('a.btn').addEventListener('click', () => { started = true; setSteps(stage); });
 
   function reset() {
-    patched = null; ack.checked = false; dl.disabled = true; $('saved').hidden = true; msg.innerHTML = ''; input.value = '';
+    patched = null; results = null; edition = 'usb'; document.querySelector('input[name=edition][value=usb]').checked = true; $('filterinfo').hidden = true; ack.checked = false; dl.disabled = true; $('saved').hidden = true; msg.innerHTML = ''; input.value = '';
     drop.classList.remove('busy'); $('droptitle').textContent = 'Drop the firmware file here';
     setSteps('waiting');
   }
+
+  const shortHex = (h) => h.length > 64 ? h.slice(0, 32) + '... (' + (h.length / 2).toLocaleString('en') + ' bytes)' : h;
+  function render() {
+    const result = results[edition], P = edition === 'filter' ? X1700_FILTER_PATCHES : X1700_PATCHES;
+    patched = result;
+    $('checks').innerHTML = [
+      'Recognised the original Denon v2.000 firmware (4,194,304 bytes), byte for byte.',
+      'Applied ' + P.patchSets.length + ' patches (' + result.changes.length + ' byte changes).',
+      'Fixed the updater checksum so the mixer accepts the file.',
+      'Checked the result against the reference build (sha256 ' + result.sha256.slice(0, 8) + '...).'
+    ].map((t) => '<li>' + CHECK + '<span>' + t + '</span></li>').join('');
+    $('sha').textContent = result.sha256;
+    $('nchanges').textContent = result.changes.length + ' changes and the checksum word';
+    const rows = result.changes.map((c) => '<tr><td><code>0x' + c.offset.toString(16) + '</code></td><td><code>' + shortHex(c.old) + '</code></td><td><code>' + shortHex(c.new) + '</code></td><td>' + esc(c.reason) + '</td></tr>');
+    rows.push('<tr><td><code>0x3ffffc</code></td><td><code>' + result.checksumWord.old + '</code></td><td><code>' + result.checksumWord.new + '</code></td><td>Updater checksum word. The updater refuses images whose checksum is wrong.</td></tr>');
+    document.querySelector('#changes tbody').innerHTML = rows.join('');
+    $('filterinfo').hidden = edition !== 'filter';
+  }
+  document.querySelectorAll('input[name=edition]').forEach((r) => r.addEventListener('change', () => {
+    if (!results || !results[r.value]) return;
+    edition = r.value; ack.checked = false; dl.disabled = true; $('saved').hidden = true; render();
+  }));
 
   async function handle(file) {
     if (!file) return;
@@ -350,6 +400,9 @@
       const fw = await X1700.loadFirmware(bytes);
       await new Promise((r) => setTimeout(r, 60));                    // let the "checking" state paint before hashing
       result = X1700.buildImage(fw, X1700_PATCHES);
+      let filter = null;
+      try { filter = X1700.buildImage(fw, X1700_FILTER_PATCHES); } catch (e) { filter = null; }   // never blocks the default build
+      results = { usb: result, filter: filter };
     } catch (e) {
       drop.classList.remove('busy'); $('droptitle').textContent = 'Drop the firmware file here';
       const friendly = e instanceof X1700.UserError;
@@ -357,21 +410,11 @@
         (friendly ? '<br><span class="hint">Use the firmware from step 1, exactly as downloaded. Files that were already patched, or modified, are refused on purpose.</span>' : '') + '</div>';
       return;
     }
-    patched = result;
     drop.classList.remove('busy'); $('droptitle').textContent = 'Drop the firmware file here';
-    const sets = X1700_PATCHES.patchSets.length;
-    $('checks').innerHTML = [
-      'Recognised the original Denon v2.000 firmware (4,194,304 bytes), byte for byte.',
-      'Applied ' + sets + ' patches (' + result.changes.length + ' byte changes).',
-      'Fixed the updater checksum so the mixer accepts the file.',
-      'Checked the result against the reference build (sha256 ' + result.sha256.slice(0, 8) + '...).'
-    ].map((t) => '<li>' + CHECK + '<span>' + t + '</span></li>').join('');
     $('fname').textContent = file.name;
-    $('sha').textContent = result.sha256;
-    $('nchanges').textContent = result.changes.length + ' changes and the checksum word';
-    const rows = result.changes.map((c) => '<tr><td><code>0x' + c.offset.toString(16) + '</code></td><td><code>' + c.old + '</code></td><td><code>' + c.new + '</code></td><td>' + esc(c.reason) + '</td></tr>');
-    rows.push('<tr><td><code>0x3ffffc</code></td><td><code>' + result.checksumWord.old + '</code></td><td><code>' + result.checksumWord.new + '</code></td><td>Updater checksum word. The updater refuses images whose checksum is wrong.</td></tr>');
-    document.querySelector('#changes tbody').innerHTML = rows.join('');
+    const fl = $('filterlabel'); fl.classList.toggle('off', !results.filter);
+    fl.querySelector('input').disabled = !results.filter;
+    render();
     setSteps('verified');
     $('s3').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
   }

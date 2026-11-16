@@ -6,6 +6,7 @@ Every image flashed to the mixer: date, sha256, result. The owner flashes; nothi
 | (factory/current) | firmware/original/X1700FW.BIN (v2.000) | 24ef3d26a116118d27787c337a8a89d67cb6b314cca38f6f22d906b3785556f3 | running on the unit |
 | 2026-11-05 | firmware/builds/X1700FW-2026-11-05-usb-macos.BIN (patch 001) | 01a3f5a486f44485ee834dcb9a7e4fc4bf0e05c0b13847d21588ea8d1e53b4ed | flashed via USB-stick updater, completed; unit boots. macOS: works in MAC mode after power cycle (8in/8out 44.1 kHz). PC mode unchanged (IAD 0xFF) |
 | 2026-11-05 | firmware/builds/X1700FW-2026-11-05-usb-macos+usb-real-rate.BIN (patches 001+002) | aa9c868e2b3bdacfad198fc0d77edcc0e420dd6dcd16957726882bf73d7d6540 | flashed, completed, boots. MAC mode 96 kHz: correct clock answers, macOS picks 96 kHz, drift ~7 ppm, audio OK. 44.1 kHz OK (selector 01, ~7 ppm). 48 kHz OK (selector 02). Windows PC mode OK. Mode switch PC<->MAC needs power cycle |
+| 2026-11-16 | USB fix + Filter edition (patches 001-003 + patches/filter/101-filter-menu.yaml, built with tools/build.py --extra-dir patches/filter) | 29a732279c069c0ed4d213f5d518d3273c1d4f01f268591b3b41a4e5c6f926ab | flashed, boots. All four new Utility rows (LPF Reso, HPF Reso, HPF Gate, HPF Range) work and the filter sounds as intended with the defaults. Not separately tested: sample-rate changes with non-default values |
 
 ## Update stick (2026-11-05)
 - SanDisk 3.2Gen1 64 GB repartitioned: MBR, partition 1 = 1 GB FAT32 "UPDATE" (4 KB clusters), rest unallocated. Was empty.
