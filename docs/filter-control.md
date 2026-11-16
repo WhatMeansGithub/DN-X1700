@@ -11,8 +11,8 @@ The USB-only build stays the default and is the tested one.
 ## Why
 
 Denon's Parameters filter (the PARAMETER knob with the filter assigned) has one fixed resonance, about 0.46, on both sides.
-On the high-pass side the resonance starts at about 400 Hz, which boosts the low end, and the high-pass sweep starts at 60 Hz
-and is at about 1.1 kHz halfway along the knob. Filter Control makes these things adjustable. Its defaults are gentler than
+On the high-pass side the resonance starts at about 400 Hz, and the high-pass sweep starts at 60 Hz
+and is at about 1.1 kHz halfway along the knob. Filter Control makes these things adjustable. Its new defaults are gentler than
 Denon's: lower resonance (less peaking at the cutoff, less bass boost on the high-pass) and a high-pass sweep that starts at
 20 Hz and spends more of the knob in the bass and low mids.
 
