@@ -26,10 +26,10 @@ confirm (BACK cancels), like any other Utility setting.
 
 | Row | Choices | Default | What it does |
 |---|---|---|---|
-| **LPF Reso** | 0 to 100 % in 2 % steps | 28 % | Resonance of the **low-pass** side (knob left of centre). 0 % is a plain filter; higher values add a peak at the cutoff. |
-| **HPF Reso** | 0 to 100 % in 2 % steps | 22 % | Resonance of the **high-pass** side (knob right of centre). Separate from the LPF, so you can keep one side clean. |
-| **HPF Gate** | Off, 100 to 1000 Hz | 400 Hz | Where the high-pass resonance starts. Below the gate the high-pass has **no** resonance (no bass boost); above it the resonance fades in over the next ten knob steps. Off = resonance from the very start of the sweep. |
-| **HPF Range** | Stock, 20-150, 20-200 ... 20-600 ... 20-2500 | 20-600 | How fast the **high-pass opens up** (explained below). The cutoff always runs from 20 Hz to 20 kHz across the knob; this sets the cutoff at the halfway point. Lower = more of the knob in the bass, higher = the mids sooner. Stock = Denon's original curve. |
+| **LPF Reso** | 0 to 100 % in 2 % steps | 28 % | Resonance of the **low-pass** side (knob left of centre). 0 % is a plain filter; higher values add a peak at the cutoff. Denon's stock: 52 %. |
+| **HPF Reso** | 0 to 100 % in 2 % steps | 22 % | Resonance of the **high-pass** side (knob right of centre). Separate from the LPF, so you can keep one side clean. Denon's stock: 52 %. |
+| **HPF Gate** | Off, 100 to 1000 Hz | 400 Hz | Where the high-pass resonance starts. Below the gate the high-pass has **no** resonance (no bass boost); above it the resonance fades in over the next ten knob steps. Off = resonance from the very start of the sweep. Denon's stock: about 400 Hz. |
+| **HPF Range** | Stock, 20-150, 20-200 ... 20-600 ... 20-2500 | 20-600 | How fast the **high-pass opens up** (explained below). The cutoff always runs from 20 Hz to 20 kHz across the knob; this sets the cutoff at the halfway point. Lower = more of the knob in the bass, higher = the mids sooner. Stock = Denon's original curve: 60 Hz at the start, about 1.1 kHz at the halfway point, 20 kHz at the end. |
 
 The choices for HPF Range are Stock and 20 Hz up to 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 700, 800, 900, 1000, 1200,
 1400, 1600, 1800, 2000 and 2500 Hz at the halfway point. The HPF Gate list is 100, 105, 110, 115, 120, 125, 130, 140 ... 1000 Hz in

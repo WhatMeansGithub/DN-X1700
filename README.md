@@ -231,12 +231,12 @@ the updater retries a few times on its own. If it ends in an error, the flash ma
 An optional second build: **the same USB fix plus settings for the Parameters filter** in the Utility menu. Utility → Parameters
 Filter Setting gets four more rows next to Denon's two:
 
-| Row | Choices | Default |
-|---|---|---|
-| **LPF Reso** | resonance of the low-pass side, 0 to 100 % | 28 % |
-| **HPF Reso** | resonance of the high-pass side, 0 to 100 % | 22 % |
-| **HPF Gate** | where the high-pass resonance starts: Off, or 100 to 1000 Hz | 400 Hz |
-| **HPF Range** | how fast the high-pass opens up: its cutoff runs from 20 Hz to 20 kHz across the knob, and this sets the cutoff at the halfway point (150 Hz to 2.5 kHz); or Stock = Denon's curve | 20-600 |
+| Row | Choices | Default | Denon's stock |
+|---|---|---|---|
+| **LPF Reso** | resonance of the low-pass side, 0 to 100 % | 28 % | 52 % |
+| **HPF Reso** | resonance of the high-pass side, 0 to 100 % | 22 % | 52 % |
+| **HPF Gate** | where the high-pass resonance starts: Off, or 100 to 1000 Hz | 400 Hz | about 400 Hz |
+| **HPF Range** | how fast the high-pass opens up: its cutoff runs from 20 Hz to 20 kHz across the knob, and this sets the cutoff at the halfway point (150 Hz to 2.5 kHz); or Stock = Denon's curve | 20-600 | Stock: 60 Hz at the start, about 1.1 kHz halfway, 20 kHz at the end |
 
 ![The new rows on the mixer display: Utility, Parameters Filter Setting](site/filter-settings-menu.jpg)
 
