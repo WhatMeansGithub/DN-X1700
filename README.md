@@ -9,7 +9,7 @@ Firmware patches for the **Denon DJ DN-X1700** mixer (system software v2.000) th
 built-in class driver in current macOS, with no vendor driver: 8 in / 8 out, 24-bit, at 44.1, 48 or 96 kHz.
 
 > **DN-X1600 owners:** the same fix works on your mixer too, **confirmed by a DN-X1600 owner** who flashed it. See
-> [DN-X1600](#dn-x1600-confirmed-by-one-owner) below, or go straight to the
+> [DN-X1600](#dn-x1600) below, or go straight to the
 > [web tool for the DN-X1600](https://whatmeansgithub.github.io/DN-X1700/x1600/).
 
 > **This repository contains no Denon firmware.** You download the official firmware from Denon, and a script on your own

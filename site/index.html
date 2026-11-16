@@ -229,7 +229,7 @@
       <ul>
         <li>The update <strong>erases the whole flash chip</strong>. If power is lost during the ~30 second write, the mixer won't start again and only an external flash programmer can recover it.</li>
         <li><strong>Your settings and presets will be reset</strong> to factory defaults. Write them down or photograph them first.</li>
-        <li>Tested on one unit, with macOS 27 on Apple Silicon and with Windows. <a href="https://github.com/WhatMeansGithub/DN-X1700#readme">Read the full README</a>.</li>
+        <li>Tested on one unit, with macOS 27 on Apple Silicon and with Windows (also reported to work with ASIO4ALL). <a href="https://github.com/WhatMeansGithub/DN-X1700#readme">Read the full README</a>.</li>
       </ul>
     </div>
   </section>
@@ -285,7 +285,7 @@
             <strong>Filter Control: new rows in Utility &rarr; Parameters Filter Setting</strong>
             <ul class="rows">
               <li><strong>LPF Reso</strong> and <strong>HPF Reso</strong>: resonance of the low-pass and the high-pass side, 0 to 100 %. Defaults 28 % and 22 %. Denon's stock is 52 % on both sides, so the defaults make the filter peak less at the cutoff.</li>
-              <li><strong>HPF Gate</strong>: where the high-pass resonance starts, Off or 100 to 1000 Hz (default 400 Hz; Denon's stock is also about 400 Hz). Below it the high-pass has no resonance, so the bass is not boosted.</li>
+              <li><strong>HPF Gate</strong>: where the high-pass resonance starts, Off or 100 to 1000 Hz (default 400 Hz; Denon's stock is also about 400 Hz). Below it the high-pass has no resonance.</li>
               <li><strong>HPF Range</strong>: how fast the high-pass opens up. Its cutoff always runs from 20 Hz (knob just right of centre) to 20 kHz (knob fully right); this setting picks the cutoff at the halfway point of that travel, from 150 Hz to 2.5 kHz. Lower values keep more of the knob in the bass, higher values reach the mids sooner. Default 20-600: 600 Hz at the halfway point. Stock is Denon's original curve: 60 Hz at the start, about 1.1 kHz at the halfway point, 20 kHz at the end.</li>
             </ul>
             <img class="shot" src="filter-settings-menu.jpg" width="800" height="629" alt="The mixer display showing Utility, Parameters Filter Setting with the rows OFF Filter, ON Filter, LPF Reso 28%, HPF Reso 22%, HPF Gate 400 Hz and HPF Range 20-600" loading="lazy">
