@@ -62,7 +62,7 @@ Plus a 4-byte update checksum that the updater requires. In total **182 bytes** 
 - macOS sees an **8-in / 8-out, 24-bit** audio device; macOS **follows the mixer's sample rate** (44.1, 48, 96 kHz) automatically.
 - USB MIDI works (it already did).
 - The mixer still works with Denon's driver on Windows in PC mode. Mac mode is class-compliant and was also reported to work on
-  Windows.
+  Windows and works with ASIO4ALL
 
 ### What does not change
 
@@ -240,7 +240,7 @@ Filter Setting gets four more rows next to Denon's two:
 
 ![The new rows on the mixer display: Utility, Parameters Filter Setting](site/filter-settings-menu.jpg)
 
-Denon's filter has one fixed resonance (about 52 % on this scale) that boosts the bass on the high-pass side. The defaults are
+Denon's filter has one fixed resonance (about 52 % on this scale) . The new defaults are
 lower (28 % and 22 %), so the filter peaks less at the cutoff; every value is yours to change, is saved with the settings and is part of Preset Export/Import. Pick it in step 3
 of the web tool, or run `python3 tools/x1700_patcher.py --filter` (result sha256
 `29a732279c069c0ed4d213f5d518d3273c1d4f01f268591b3b41a4e5c6f926ab`). It adds a small program that runs in RAM while the mixer is
@@ -264,7 +264,7 @@ the whole chip from that file). This repository does not provide support for tha
 
 ---
 
-## DN-X1600 (confirmed by one owner)
+## DN-X1600 
 
 **Web tool: https://whatmeansgithub.github.io/DN-X1700/x1600/**
 
