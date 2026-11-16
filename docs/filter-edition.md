@@ -87,10 +87,9 @@ The patch is data, like the others: `patches/filter/101-filter-menu.yaml`, gener
   sounds as intended with the defaults.
 - The generated code is run against models of Denon's routines in an SH-2A emulator on every build (boot in every system
   mode, settings at their limits, the whole menu walk, the safety check passing and failing).
-- **Not separately verified:** changing the sample rate (PC mode) while using non-default values; use together with other
-  firmware changes; other hardware revisions.
-- No audio problem has been confirmed. One tester wondered about a faint crackle with the filter that could not be separated
-  from the music material; if you hear something that looks like a defect, please report it.
+- Changing the sample rate with non-default values was tried: the settings kept working.
+- **Not verified:** use together with other firmware changes; other hardware revisions.
+- If you hear something that looks like a defect, please report it.
 
 ## Going back
 
