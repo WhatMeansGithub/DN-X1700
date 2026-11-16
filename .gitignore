@@ -23,7 +23,7 @@ docs/roadmap.md
 X1600 Firmware/
 X600 Firmware/
 
-# Private filter research (the published Filter edition is patches/filter/101-filter-menu.yaml and tools/gen_filter_menu.py)
+# Private filter research (the published Filter Control is patches/filter/101-filter-menu.yaml and tools/gen_filter_menu.py)
 patches/filter/old/
 tools/gen_filter_curve.py
 docs/filter-private.md

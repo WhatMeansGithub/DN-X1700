@@ -72,9 +72,9 @@ const p600 = process.argv[4] || new URL('../firmware/original/X600FW.BIN', impor
 const P1700 = globalThis.X1700_PATCHES, P1600 = globalThis.X1600_PATCHES, P600 = globalThis.X600_PATCHES;
 await suite('X1700', P1700, p1700, 'X1700FW.BIN', 'firmware-dnx1700-v2000', 0x400000);
 
-// Filter edition (same page, second patch set): USB fix + menu control of the Parameters filter
+// Filter Control (same page, second patch set): USB fix + menu control of the Parameters filter
 {
-  console.log('\n== X1700 filter edition');
+  console.log('\n== X1700 Filter Control');
   const PF = globalThis.X1700_FILTER_PATCHES;
   const rf = X.buildImage(o1700, PF);
   ok('filter: result sha256 equals reference build', rf.sha256 === PF.resultSha256, rf.sha256.slice(0, 16));

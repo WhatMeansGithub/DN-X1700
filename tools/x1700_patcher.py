@@ -5,8 +5,8 @@ applies the USB fixes and writes a ready-to-flash X1700FW.BIN. Python 3.8+ stand
   python3 tools/x1700_patcher.py                       download from Denon, write ./X1700FW.BIN
   python3 tools/x1700_patcher.py --file firmware-dnx1700-v2000.zip      use a file you already have (zip or X1700FW.BIN)
   python3 tools/x1700_patcher.py --stick /Volumes/UPDATE                 also copy it to the root of your USB stick and verify
-  python3 tools/x1700_patcher.py --filter                                the experimental Filter edition (USB fix + Parameters filter
-                                                                         settings in the Utility menu, see docs/filter-edition.md)
+  python3 tools/x1700_patcher.py --filter                                Filter Control (USB fix + Parameters filter
+                                                                         settings in the Utility menu, see docs/filter-control.md)
 
 Nothing is flashed by this tool. Read the README first: flashing can permanently damage the mixer, and your settings will be reset.
 """
@@ -104,7 +104,7 @@ def main():
     ap.add_argument("--file", help="use this firmware (Denon's zip or X1700FW.BIN) instead of downloading it")
     ap.add_argument("--out", default=".", help="folder for the patched X1700FW.BIN (default: current folder)")
     ap.add_argument("--stick", help="also copy it to the root of this mounted USB stick (e.g. /Volumes/UPDATE) and verify the copy")
-    ap.add_argument("--filter", action="store_true", help="build the experimental Filter edition (USB fix + filter menu settings) instead of the USB fix alone")
+    ap.add_argument("--filter", action="store_true", help="build with Filter Control (USB fix + Parameters filter settings in the Utility menu) instead of the USB fix alone")
     ap.add_argument("--yes", action="store_true", help="skip the confirmation question (you have read the warning)")
     ap.add_argument("--force", action="store_true", help="overwrite an existing X1700FW.BIN")
     a = ap.parse_args()
@@ -116,7 +116,7 @@ def main():
     try:
         P = json.loads((DATA_FILTER if a.filter else DATA).read_text())
         if a.filter:
-            print(" Filter edition: experimental, tested by one owner on one unit. See docs/filter-edition.md.\n")
+            print(" Filter Control: tested by one owner on one unit. See docs/filter-control.md.\n")
         raw = pathlib.Path(a.file).read_bytes() if a.file else download(FIRMWARE_URL)
         img = build(firmware_from(raw), P)
     except FileNotFoundError as e:

@@ -1,4 +1,4 @@
-# Filter edition (experimental)
+# Filter Control
 
 An optional build of the DN-X1700 firmware: **the USB fix plus settings for the Parameters filter** in the Utility menu.
 You choose it in step 3 of the [web tool](https://whatmeansgithub.github.io/DN-X1700/) (or with `tools/x1700_patcher.py --filter`).
@@ -6,20 +6,23 @@ The USB-only build stays the default and is the tested one.
 
 > Same warning as for everything in this repository: flashing can permanently damage the mixer, your settings are reset by the
 > update, and nobody here accepts responsibility. See the [README](../README.md#read-this-first-disclaimer-and-risks).
-> The Filter edition has been tested by **one owner on one unit**.
+> Filter Control has been tested by **one owner on one unit**.
 
 ## Why
 
 Denon's Parameters filter (the PARAMETER knob with the filter assigned) has one fixed resonance, about 0.46, on both sides.
 On the high-pass side the resonance starts at about 400 Hz, which boosts the low end, and the high-pass sweep starts at 60 Hz
-and reaches only about 1.1 kHz at half travel. The Filter edition makes these things adjustable, and its defaults give a
-cleaner filter: lower resonance, a high-pass sweep that starts at 20 Hz and spends more of the knob in the bass and low mids.
+and reaches only about 1.1 kHz at half travel. Filter Control makes these things adjustable. Its defaults are gentler than
+Denon's: lower resonance (less peaking at the cutoff, less bass boost on the high-pass) and a high-pass sweep that starts at
+20 Hz and spends more of the knob in the bass and low mids.
 
 ## The new settings
 
 **Utility → Parameters Filter Setting** has six rows instead of two. Rows 1 and 2 are Denon's (the filter type for Parameter
 OFF and ON: Isolator, Crossover, Through). Rows 3 to 6 are new. Select a row, press ENTER, turn the encoder, press ENTER to
 confirm (BACK cancels), like any other Utility setting.
+
+![The mixer display: Utility, Parameters Filter Setting with the four new rows](../site/filter-settings-menu.jpg)
 
 | Row | Choices | Default | What it does |
 |---|---|---|---|
@@ -48,7 +51,7 @@ bytes. A preset made on a stock mixer (or on the USB-only build) has zeros there
 
 ## Defaults compared with Denon's stock filter
 
-| | Stock | Filter edition default |
+| | Stock | Filter Control default |
 |---|---|---|
 | Low-pass resonance | 0.46 (52 %) | 0.25 (28 %) |
 | High-pass resonance | 0.46 (52 %), starts at 403 Hz | 0.20 (22 %), starts at 400 Hz |

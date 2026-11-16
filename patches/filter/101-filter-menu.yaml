@@ -1,12 +1,12 @@
 name: filter-menu
 description: >
-  Filter edition. Utility > Parameters Filter Setting gets four more rows: LPF Reso and HPF Reso (0..100 %), HPF Gate
+  Filter Control. Utility > Parameters Filter Setting gets four more rows: LPF Reso and HPF Reso (0..100 %), HPF Gate
   (Off, 100..1000 Hz) and HPF Range (Stock, 20-150 .. 20-2500). Stored in settings bytes 92..95 (unused by Denon,
   saved with the settings and in Preset Export/Import). A small program in unused flash is copied to RAM at start-up
   (normal mode only) and writes the damping table and the HPF cutoff coefficients into the DSP when a setting changes.
   Nothing in Denon's DSP package is patched. Generated and emulator-checked by tools/gen_filter_menu.py.
-  Details: docs/filter-edition.md.
-status: experimental, tested by one owner on one unit
+  Details: docs/filter-control.md.
+status: tested by one owner on one unit
 patches:
   - offset: 0xd3a00
     expect: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"

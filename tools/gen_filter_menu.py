@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Filter edition: Utility-menu control of the Parameters filter -> patches/filter/101-filter-menu.yaml.
+"""Filter Control: Utility-menu control of the Parameters filter -> patches/filter/101-filter-menu.yaml.
 
 Adds four rows to Utility > Parameters Filter Setting, after Denon's OFF Filter / ON Filter:
   LPF Reso   0..100 % in 2 % steps   default 28 % (LPF resonance 0.25; Denon's stock value is 0.46, about 52 %)
@@ -19,7 +19,7 @@ them to the DSP over its host port, using Denon's own write routine. Four pointe
 Utility menu (row count, row label, draw, encoder, ENTER); the editors reuse Denon's own value-editor screen. Nothing is patched
 in Denon's DSP package. In Version UP Mode and the service modes nothing is installed.
 Safety: the HPF Range is only written if 18 of the DSP's own cutoff coefficients match the values computed here (+-8 ulp);
-otherwise the row has no effect and everything else still works. See docs/filter-edition.md.
+otherwise the row has no effect and everything else still works. See docs/filter-control.md.
 
 Needs: firmware/original/X1700FW.BIN, numpy (exact float32 powf), GNU binutils for sh-elf (sh-elf-as, sh-elf-objcopy, sh-elf-nm; set
 SH_ELF_BIN to their folder, or put them on PATH). The checks (an SH-2A emulator running the generated code against models of
@@ -1408,13 +1408,13 @@ if __name__ == "__main__":
         "was 0x0C000C04, which the hook calls first).",
     ]
     lines = ["name: filter-menu", "description: >",
-             "  Filter edition. Utility > Parameters Filter Setting gets four more rows: LPF Reso and HPF Reso (0..100 %), HPF Gate",
+             "  Filter Control. Utility > Parameters Filter Setting gets four more rows: LPF Reso and HPF Reso (0..100 %), HPF Gate",
              "  (Off, 100..1000 Hz) and HPF Range (Stock, 20-150 .. 20-2500). Stored in settings bytes 92..95 (unused by Denon,",
              "  saved with the settings and in Preset Export/Import). A small program in unused flash is copied to RAM at start-up",
              "  (normal mode only) and writes the damping table and the HPF cutoff coefficients into the DSP when a setting changes.",
              "  Nothing in Denon's DSP package is patched. Generated and emulator-checked by tools/gen_filter_menu.py.",
-             "  Details: docs/filter-edition.md.",
-             "status: experimental, tested by one owner on one unit", "patches:"]
+             "  Details: docs/filter-control.md.",
+             "status: tested by one owner on one unit", "patches:"]
     for (off, new), reason in zip(spans, reasons):
         lines += [f"  - offset: {off:#x}", f'    expect: "{ORIG[off:off + len(new)].hex()}"', f'    new: "{bytes(new).hex()}"',
                   f"    reason: {json.dumps(reason)}"]

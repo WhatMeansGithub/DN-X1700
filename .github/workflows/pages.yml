@@ -63,7 +63,7 @@ jobs:
       - name: Publish only the page files
         run: |
           mkdir -p _site/x1600
-          cp site/index.html site/patcher.js site/patches.js site/patches-filter.js _site/
+          cp site/index.html site/patcher.js site/patches.js site/patches-filter.js site/filter-settings-menu.jpg _site/
           cp site/x1600/index.html site/x1600/patches.js _site/x1600/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

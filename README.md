@@ -66,7 +66,7 @@ Plus a 4-byte update checksum that the updater requires. In total **182 bytes** 
 
 ### What does not change
 
-- No new features, effects or settings in the default build (an optional [Filter edition](#filter-edition-experimental) adds some). The firmware version number is unchanged (the mixer shows v2.000).
+- No new features, effects or settings in the default build (the optional [Filter Control](#filter-control) adds some). The firmware version number is unchanged (the mixer shows v2.000).
 - No volume slider in macOS: the mixer exposes no volume controls. Use the mixer's levels and your software's.
 - Switching **PC/MAC** or the **sample rate** still requires a power cycle of the mixer (see below).
 
@@ -226,7 +226,7 @@ the updater retries a few times on its own. If it ends in an error, the flash ma
 
 ---
 
-## Filter edition (experimental)
+## Filter Control
 
 An optional second build: **the same USB fix plus settings for the Parameters filter** in the Utility menu. Utility → Parameters
 Filter Setting gets four more rows next to Denon's two:
@@ -238,12 +238,14 @@ Filter Setting gets four more rows next to Denon's two:
 | **HPF Gate** | where the high-pass resonance starts: Off, or 100 to 1000 Hz | 400 Hz |
 | **HPF Range** | the high-pass sweep: Stock, or 20 Hz at the centre and 150 Hz to 2.5 kHz at half travel, 20 kHz at the end | 20-600 |
 
-Denon's filter has one fixed resonance (about 52 % on this scale) that boosts the bass on the high-pass side. The defaults give a
-cleaner filter; every value is yours to change, is saved with the settings and is part of Preset Export/Import. Pick it in step 3
+![The new rows on the mixer display: Utility, Parameters Filter Setting](site/filter-settings-menu.jpg)
+
+Denon's filter has one fixed resonance (about 52 % on this scale) that boosts the bass on the high-pass side. The defaults are
+lower (28 % and 22 %), so the filter peaks less at the cutoff; every value is yours to change, is saved with the settings and is part of Preset Export/Import. Pick it in step 3
 of the web tool, or run `python3 tools/x1700_patcher.py --filter` (result sha256
 `29a732279c069c0ed4d213f5d518d3273c1d4f01f268591b3b41a4e5c6f926ab`). It adds a small program that runs in RAM while the mixer is
 on and changes nothing in Denon's DSP; Version UP Mode is untouched. **Tested by one owner on one unit.** All the details, what
-each setting does, how it works and what has not been verified: [docs/filter-edition.md](docs/filter-edition.md).
+each setting does, how it works and what has not been verified: [docs/filter-control.md](docs/filter-control.md).
 
 ---
 
@@ -313,11 +315,11 @@ supported yet.
 
 | Path | What it is |
 |---|---|
-| `patches/` | The patches as data: offset, expected original bytes, new bytes, reason. `patches/filter/` is the optional Filter edition |
+| `patches/` | The patches as data: offset, expected original bytes, new bytes, reason. `patches/filter/` is the optional Filter Control |
 | `site/` | The web tool (`index.html`, `patcher.js`, generated `patches.js` and `patches-filter.js`), the DN-X1600 page (`x1600/`) and the tests for both (`test.mjs`, run with Node) |
 | `patches/x1600/`, `tools/models.py` | DN-X1600 patch data (confirmed by one owner) and per-model addresses; `gen_patch002.py`, `sim_patch002.py` and `build.py` take `--model X1600` |
 | `tools/x1700_patcher.py` | One-command program: downloads or loads the firmware, verifies, patches, optionally copies to the stick |
-| `tools/gen_filter_menu.py` | Generates the Filter edition patch (menu code, tables) and checks it in an SH-2A emulator; needs sh-elf binutils and numpy |
+| `tools/gen_filter_menu.py` | Generates the Filter Control patch (menu code, tables) and checks it in an SH-2A emulator; needs sh-elf binutils and numpy |
 | `tools/gen_site_data.py` | Generates the data used by the web tool and the program from `patches/*.yaml` (run it after changing a patch) |
 | `tools/build.py` | Applies patches only if the original matches byte for byte; fixes the updater checksum; writes image, diff and manifest |
 | `tools/checksum.py` | The updater's integrity rule |
