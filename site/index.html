@@ -138,6 +138,7 @@
   .callout { margin:14px 0 0; border-radius:6px; padding:14px 16px; border:1px solid var(--line); background:var(--surface-2); }
   .callout.warn { background:var(--warn-bg); border-color:var(--warn-line); }
   .callout.ok { background:var(--ok-bg); border-color:var(--ok-line); }
+  .callout.info { background:var(--accent-soft); border-color:var(--accent); }
   .callout > strong:first-child { display:block; margin-bottom:2px; }
 
   footer { color:var(--muted); font-size:.88rem; padding:32px 0 56px; }
@@ -280,7 +281,7 @@
               <span><strong>USB fix + Filter Control</strong><br>
               The same fix, plus extra settings for the Parameters filter in the Utility menu.</span></label>
           </fieldset>
-          <div class="callout warn" id="filterinfo" hidden>
+          <div class="callout info" id="filterinfo" hidden>
             <strong>Filter Control: new rows in Utility &rarr; Parameters Filter Setting</strong>
             <ul class="rows">
               <li><strong>LPF Reso</strong> and <strong>HPF Reso</strong>: resonance of the low-pass and the high-pass side, 0 to 100 %. Defaults 28 % and 22 %, lower than Denon's fixed 52 %, so the filter peaks less at the cutoff.</li>
