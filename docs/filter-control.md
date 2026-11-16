@@ -12,7 +12,7 @@ The USB-only build stays the default and is the tested one.
 
 Denon's Parameters filter (the PARAMETER knob with the filter assigned) has one fixed resonance, about 0.46, on both sides.
 On the high-pass side the resonance starts at about 400 Hz, which boosts the low end, and the high-pass sweep starts at 60 Hz
-and reaches only about 1.1 kHz at half travel. Filter Control makes these things adjustable. Its defaults are gentler than
+and is at about 1.1 kHz halfway along the knob. Filter Control makes these things adjustable. Its defaults are gentler than
 Denon's: lower resonance (less peaking at the cutoff, less bass boost on the high-pass) and a high-pass sweep that starts at
 20 Hz and spends more of the knob in the bass and low mids.
 
@@ -29,11 +29,18 @@ confirm (BACK cancels), like any other Utility setting.
 | **LPF Reso** | 0 to 100 % in 2 % steps | 28 % | Resonance of the **low-pass** side (knob left of centre). 0 % is a plain filter; higher values add a peak at the cutoff. |
 | **HPF Reso** | 0 to 100 % in 2 % steps | 22 % | Resonance of the **high-pass** side (knob right of centre). Separate from the LPF, so you can keep one side clean. |
 | **HPF Gate** | Off, 100 to 1000 Hz | 400 Hz | Where the high-pass resonance starts. Below the gate the high-pass has **no** resonance (no bass boost); above it the resonance fades in over the next ten knob steps. Off = resonance from the very start of the sweep. |
-| **HPF Range** | Stock, 20-150, 20-200 ... 20-600 ... 20-2500 | 20-600 | The shape of the **high-pass sweep**: cutoff 20 Hz at the centre detent, the shown frequency at **half of the high-pass travel**, 20 kHz at the end. A low number keeps more of the sweep in the bass; a high one gets into the mids faster. Stock = Denon's original curve. |
+| **HPF Range** | Stock, 20-150, 20-200 ... 20-600 ... 20-2500 | 20-600 | How fast the **high-pass opens up** (explained below). The cutoff always runs from 20 Hz to 20 kHz across the knob; this sets the cutoff at the halfway point. Lower = more of the knob in the bass, higher = the mids sooner. Stock = Denon's original curve. |
 
 The choices for HPF Range are Stock and 20 Hz up to 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 700, 800, 900, 1000, 1200,
-1400, 1600, 1800, 2000 and 2500 Hz at half travel. The HPF Gate list is 100, 105, 110, 115, 120, 125, 130, 140 ... 1000 Hz in
+1400, 1600, 1800, 2000 and 2500 Hz at the halfway point. The HPF Gate list is 100, 105, 110, 115, 120, 125, 130, 140 ... 1000 Hz in
 steps of about 5 % (the gate can only sit on one of the knob's own steps, which are about that far apart).
+
+**HPF Range in one picture.** Look only at the right half of the knob, the high-pass side. Its cutoff always starts at 20 Hz
+(knob just right of the centre) and ends at 20 kHz (knob all the way right). HPF Range decides where the cutoff is when the knob
+is **halfway** between those two points. With the default 20-600, the first half of that travel covers 20 Hz to 600 Hz and the
+second half covers 600 Hz to 20 kHz. With 20-200 the first half only reaches 200 Hz, so you get very fine control of the bass
+and the mids arrive late; with 20-2000 the sweep gets into the mids quickly. Stock is Denon's own curve, which starts at 60 Hz and
+is at about 1.1 kHz halfway.
 
 **Resonance scale.** The same on both sides: 100 % is a resonance value of 0.89, just below self-oscillation. 52 % is
 Denon's stock amount (0.46). **Turn the volume down when you try values
@@ -55,7 +62,7 @@ bytes. A preset made on a stock mixer (or on the USB-only build) has zeros there
 |---|---|---|
 | Low-pass resonance | 0.46 (52 %) | 0.25 (28 %) |
 | High-pass resonance | 0.46 (52 %), starts at 403 Hz | 0.20 (22 %), starts at 400 Hz |
-| High-pass sweep | 60 Hz at the first step, about 1.1 kHz at half travel | 20 Hz at the first step, 600 Hz at half travel |
+| High-pass sweep | 60 Hz at the first step, about 1.1 kHz halfway along the knob | 20 Hz at the first step, 600 Hz halfway along the knob |
 
 To get back to Denon's behaviour, set LPF Reso to 52 %, HPF Reso to 52 %, HPF Range to Stock and HPF Gate to 400 Hz.
 

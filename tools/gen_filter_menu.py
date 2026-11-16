@@ -5,8 +5,8 @@ Adds four rows to Utility > Parameters Filter Setting, after Denon's OFF Filter 
   LPF Reso   0..100 % in 2 % steps   default 28 % (LPF resonance 0.25; Denon's stock value is 0.46, about 52 %)
   HPF Reso   0..100 % in 2 % steps   default 22 % (HPF resonance 0.196)
   HPF Gate   Off, 100..1000 Hz       default 400 Hz: the HPF resonance starts at this cutoff and fades in over 10 knob steps
-  HPF Range  Stock, 20-150 .. 20-2500  default 20-600: HPF cutoff 20 Hz at the centre detent, the shown frequency at half
-             of the HPF travel, 20 kHz at full travel. "Stock" is Denon's own curve.
+  HPF Range  Stock, 20-150 .. 20-2500  default 20-600: the HPF cutoff runs from 20 Hz (knob just right of centre) to 20 kHz (knob
+             fully right); the shown frequency is the cutoff at the halfway point of that travel. "Stock" is Denon's own curve.
 The settings use bytes 92..95 of the 126-byte settings record (92 LPF reso, 93 gate, 94 HPF reso, 95 range). Those bytes are
 unused by Denon's firmware, are saved with the settings and are part of Preset Export / Import. Stored value = choice + 1;
 0 or out of range = the default. Denon's own code copies the menu's work copy to the applied copy when Utility is left.

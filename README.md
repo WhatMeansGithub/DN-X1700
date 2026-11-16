@@ -236,7 +236,7 @@ Filter Setting gets four more rows next to Denon's two:
 | **LPF Reso** | resonance of the low-pass side, 0 to 100 % | 28 % |
 | **HPF Reso** | resonance of the high-pass side, 0 to 100 % | 22 % |
 | **HPF Gate** | where the high-pass resonance starts: Off, or 100 to 1000 Hz | 400 Hz |
-| **HPF Range** | the high-pass sweep: Stock, or 20 Hz at the centre and 150 Hz to 2.5 kHz at half travel, 20 kHz at the end | 20-600 |
+| **HPF Range** | how fast the high-pass opens up: its cutoff runs from 20 Hz to 20 kHz across the knob, and this sets the cutoff at the halfway point (150 Hz to 2.5 kHz); or Stock = Denon's curve | 20-600 |
 
 ![The new rows on the mixer display: Utility, Parameters Filter Setting](site/filter-settings-menu.jpg)
 
