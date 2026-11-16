@@ -392,7 +392,7 @@
 
 <script src="patches.js"></script>
 <script src="../patcher.js"></script>
-<script src="../dnflash.js"></script>
+<script src="../dnflash.js?v=2"></script>
 <script>
 (function () {
   'use strict';
@@ -547,7 +547,7 @@
       log((dry ? 'DRY RUN. ' : '') + 'Sending the ' + kind + ' firmware (' + image.length + ' bytes, sha256 ' + X1700.sha256(image).slice(0, 16) + '...)');
       const link = dry ? new WF.DryLink() : new WF.Link(dev, log);
       try {
-        await WF.flash({ link, image, log, aborted: () => stop,
+        await WF.flash({ link, image, log, aborted: () => stop, expectName: 'DN-X600',
           progress: (d, t, ph) => { $('wfbar').style.width = (100 * d / t) + '%'; $('wfstatus').textContent = ph === 'execute' ? 'Executing: the mixer is writing its flash. Do not touch anything.' : ph === 'done' ? 'Finished.' : ph === 'select' ? 'Talking to the mixer...' : 'Sending ' + d + ' / ' + t + ' blocks'; if (ph === 'execute') $('wfstop').hidden = true; } });
         if (dry) { log('Dry run: ' + link.sent.length + ' packets. First four:'); link.sent.slice(0, 4).forEach((p) => log('  ' + WF.hex(p))); log('Last three:'); link.sent.slice(-3).forEach((p) => log('  ' + WF.hex(p))); }
       } catch (e) { log('ERROR: ' + e.message); $('wfstatus').textContent = 'Stopped: ' + e.message; }
