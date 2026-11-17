@@ -115,7 +115,7 @@ Full details, evidence and dead ends are in `docs/`.
 ## Before you flash: checklist
 
 - [ ] You have read the [disclaimer](#read-this-first-disclaimer-and-risks) and accept the risk.
-- [ ] You have written down or photographed **all** your settings (they will be reset).
+- [ ] You have written down, exported or photographed **all** your settings (they will be reset).
 - [ ] The mixer is on **stable mains power** that nobody will interrupt (a UPS is a good idea).
 - [ ] You have a **FAT32** USB stick with an **MBR** partition table. A small one (a 1 GB partition) is safest. A 64 GB stick
       also passed the mixer's own check, but smaller is the lower-risk choice.
