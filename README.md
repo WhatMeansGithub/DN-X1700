@@ -12,6 +12,10 @@ built-in class driver in current macOS, with no vendor driver: 8 in / 8 out, 24-
 > [DN-X1600](#dn-x1600) below, or go straight to the
 > [web tool for the DN-X1600](https://whatmeansgithub.github.io/DN-X1700/x1600/).
 
+> **DN-X600 owners:** there is a version for your mixer too, with a built-in flasher that works from Chrome or Edge on a Mac or
+> Windows PC, **flashed on a real DN-X600 by one owner**. See [DN-X600](#dn-x600) below, or go straight to the
+> [web tool for the DN-X600](https://whatmeansgithub.github.io/DN-X1700/x600/).
+
 > **This repository contains no Denon firmware.** You download the official firmware from Denon, and a script on your own
 > computer applies the patches and builds the image. Nothing here is from, or endorsed by, Denon DJ or inMusic.
 
@@ -306,8 +310,45 @@ power-cycle the mixer after changing it or the sample rate, as on the DN-X1700.
 the [Engine DJ community thread](https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550) with your Mac model and macOS version, whether the mixer shows up in Audio MIDI Setup as 8 in /
 8 out, playback and recording at 44.1, 48 and 96 kHz, and MIDI. Technical details: [docs/x1600.md](docs/x1600.md).
 
-The DN-X600 is built from the same code but updates differently (Denon's updater app over the USB cable), so it is **not**
-supported yet.
+---
+
+## DN-X600
+
+**Web tool and flasher: https://whatmeansgithub.github.io/DN-X1700/x600/**
+
+The DN-X600 has the same USB audio problem as the DN-X1700, and its firmware (system software v1.030) is built from the same
+code, so the fix is the same one, ported. **A DN-X600 owner flashed it on a real unit with the page's browser flasher, and the update
+completed.** That is one report so far (the author has no DN-X600), so treat it with the same care as any firmware update:
+everything in [the disclaimer above](#read-this-first-disclaimer-and-risks) applies to it, including **no guarantees**. Reports on USB
+audio and MIDI with a Mac are still welcome.
+
+**How the DN-X600 differs from the other two:**
+
+- **Updating:** there is no USB-A port. The mixer is updated from a computer over its USB-B port. Denon's updater for it (DDJ Updater)
+  runs on Windows only: the Mac version is a PowerPC/32-bit program that current macOS refuses to start. The web tool therefore has
+  its own **browser flasher** (Chrome or Edge, on a Mac or Windows PC, via WebHID) that sends the same messages as Denon's updater.
+  Hold **DUCKING** and **SELECT** while switching on until the display shows **UP**, then connect, choose the file and press Start.
+  Nothing is written to the flash until the final Execute step. You can also use Denon's own updater with the patched file.
+- **File check:** the image is 2 MiB and its integrity check is a CRC-32 stored in a 32-byte header at the end of the file (not the
+  DN-X1700's word sum). The web tool, the build script and the tests all produce the same file (sha256
+  `0c79bb2b488153c5baa117c9fc6e4fd347582291de8e3f793118ec9d4afd58cb` for the current patch set).
+- **PC/Mac:** there is no Utility menu. Unplug USB, hold **EFX CUE** and press **BEAT** ◀ ▶ to enter the OS setting mode, choose
+  **Mac OS**, press **TAP**, then power-cycle the mixer (the default is PC; it cannot be changed while a computer is connected).
+- **Flash chip:** IC103 is an **EN29LV160BB-70TIP**, the same 2 MB part as the DN-X1600.
+
+**Why it should work:** the USB descriptor is byte for byte the DN-X1700's, the sample-rate code is the same code at different addresses
+(patches `001`, `002` and `003` are ported with every address checked against the image, and the added code runs in a simulator at 44.1,
+48 and 96 kHz), and the browser flasher was checked against a USB capture of Denon's updater flashing a real DN-X600. A guide for people
+who want to test, including how to capture the updater with Wireshark, is in [docs/x600-testing.md](docs/x600-testing.md).
+
+**If it doesn't work**, the likely outcome is that USB audio on the Mac still doesn't work. You can flash Denon's original `X600FW.BIN`
+back the same way. The real risk is the same as for any firmware update: a power or cable loss while the mixer writes its flash can leave
+it needing an external flash programmer (EN29LV160, see above), and your settings may be reset.
+
+**Please report back** if you try it, whether it worked or not: [open an issue](https://github.com/WhatMeansGithub/DN-X1700/issues) or reply in
+the [Engine DJ community thread](https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550)
+with your Mac model and macOS version, whether the mixer shows up in Audio MIDI Setup as 8 in / 8 out, playback and recording at 44.1, 48
+and 96 kHz, and MIDI. Technical details and the update protocol: [docs/x600.md](docs/x600.md).
 
 ---
 
@@ -318,6 +359,7 @@ supported yet.
 | `patches/` | The patches as data: offset, expected original bytes, new bytes, reason. `patches/filter/` is the optional Filter Control |
 | `site/` | The web tool (`index.html`, `patcher.js`, generated `patches.js` and `patches-filter.js`), the DN-X1600 page (`x1600/`) and the tests for both (`test.mjs`, run with Node) |
 | `patches/x1600/`, `tools/models.py` | DN-X1600 patch data (confirmed by one owner) and per-model addresses; `gen_patch002.py`, `sim_patch002.py` and `build.py` take `--model X1600` |
+| `patches/x600/`, `site/x600/`, `site/dnflash.js` | DN-X600 patch data, its web page, and the WebHID flasher (`site/test_flash.mjs` tests it against a simulated mixer); the DN-X600 uses a CRC-32 file check (`tools/checksum.py`) |
 | `tools/x1700_patcher.py` | One-command program: downloads or loads the firmware, verifies, patches, optionally copies to the stick |
 | `tools/gen_filter_menu.py` | Generates the Filter Control patch (menu code, tables) and checks it in an SH-2A emulator; needs sh-elf binutils and numpy |
 | `tools/gen_site_data.py` | Generates the data used by the web tool and the program from `patches/*.yaml` (run it after changing a patch) |

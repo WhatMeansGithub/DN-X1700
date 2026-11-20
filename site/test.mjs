@@ -105,7 +105,7 @@ if (existsSync(p600)) {
   throwsUser('X600 firmware is refused by the X1700 page', () => X.buildImage(o600, P1700));
   if (existsSync(p1600)) throwsUser('X600 firmware is refused by the X1600 page', () => X.buildImage(o600, P1600));
   throwsUser('X1700 firmware is refused by the X600 page', () => X.buildImage(o1700, P600));
-  ok('X600 data is marked untested, CRC-32, v1.030', P600.untested === true && P600.fwName === 'X600FW.BIN' && P600.size === 0x200000 && P600.integrity === 'crc32' && P600.version === 'v1.030');
+  ok('X600 data is marked tested (confirmed by one owner), CRC-32, v1.030', P600.untested === false && P600.fwName === 'X600FW.BIN' && P600.size === 0x200000 && P600.integrity === 'crc32' && P600.version === 'v1.030');
   const bad = o600.slice(); bad[bad.length - 1] ^= 1;
   throwsUser('X600 with a wrong CRC is refused', () => X.buildImage(bad, P600));
   const res = X.buildImage(o600, P600).image;

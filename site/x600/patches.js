@@ -5,7 +5,7 @@ globalThis.X600_PATCHES = {
  "size": 2097152,
  "integrity": "crc32",
  "version": "v1.030",
- "untested": true,
+ "untested": false,
  "originalSha256": "d58c122694f03493a7fe7da0ddbc77d63e67a317978d6e42285fff861037b5d8",
  "resultSha256": "0c79bb2b488153c5baa117c9fc6e4fd347582291de8e3f793118ec9d4afd58cb",
  "patchSets": [

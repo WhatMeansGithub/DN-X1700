@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DN-X600 Mac USB fix</title>
-<meta name="description" content="Experimental: patch your Denon DN-X600 firmware so its USB audio works on current macOS. Not yet tested on a real DN-X600. Runs entirely in your browser; your file is never uploaded.">
+<meta name="description" content="Patch your Denon DN-X600 firmware so its USB audio works on current macOS, and flash it from the browser on a Mac or Windows PC. Flashed on a real DN-X600 by one owner. Runs entirely in your browser; your file is never uploaded.">
 <meta name="color-scheme" content="light dark">
 <style>
   :root {
@@ -142,6 +142,7 @@
   .untested { margin:28px 0 0; background:var(--warn-bg); border:1px solid var(--warn-line); border-radius:var(--radius); padding:18px 20px; }
   .untested h2 { font-size:1.15rem; color:var(--warn); margin-bottom:8px; }
   .untested ul { margin:8px 0 12px; padding-left:20px; } .untested li { margin:4px 0; }
+  .untested.confirmed { background:var(--ok-bg); border-color:var(--ok-line); } .untested.confirmed h2 { color:var(--ok); }
   .chip.exp { color:var(--warn); border-color:var(--warn-line); background:var(--warn-bg); }
   .chip.exp svg { stroke:var(--warn); }
   footer { color:var(--muted); font-size:.88rem; padding:32px 0 56px; }
@@ -218,7 +219,7 @@
     <p class="lead">Patch your mixer's firmware so USB audio and MIDI work with the built-in macOS driver: 8 in / 8 out, 24-bit, at 44.1, 48 or 96 kHz.
        It takes a few clicks, right here in your browser.</p>
     <div class="chips">
-      <span class="chip exp"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18v.01"/></svg> Experimental: not yet tested on a DN-X600</span>
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> Flashed on a real DN-X600 by one owner</span>
       <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> Nothing is uploaded</span>
       <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> No Denon code hosted here</span>
       <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg> Free and open source</span>
@@ -229,19 +230,19 @@
 
   <noscript><div class="alert"><strong>JavaScript is off.</strong> This page needs JavaScript to patch the file. The README on GitHub shows other ways to do it.</div></noscript>
 
-  <section class="untested" role="note" aria-label="Not tested on hardware yet">
-    <h2>Not tested on a real DN-X600 yet</h2>
-    <p>This is the same fix that makes the <a href="../">DN-X1700</a> work on current macOS, confirmed on a real DN-X1700. Nobody has flashed it on a DN-X600 yet. You would be one of the first.</p>
+  <section class="untested confirmed" role="note" aria-label="Test status">
+    <h2>Confirmed by one DN-X600 owner</h2>
+    <p>This is the same fix that makes the <a href="../">DN-X1700</a> work on current macOS, confirmed on a real DN-X1700. A DN-X600 owner has flashed this version on a real unit with the browser flasher below, and the update completed. That is one report so far (the author has no DN-X600), so the usual care applies. Reports on USB audio and MIDI with a Mac are still welcome.</p>
     <p><strong>Why it should work:</strong> Denon built the DN-X600 firmware from the same code as the DN-X1700.</p>
     <ul>
       <li>The USB description the mixer sends to the computer is byte for byte the same as the DN-X1700's.</li>
       <li>The faulty sample-rate code is the same, only at different addresses.</li>
-      <li>The DN-X600 is updated differently (Denon's DDJ Updater over USB, with its own CRC-32 file check), and this page builds that check. It was worked out from the updater program and reproduces the checksum of Denon's original file exactly.</li>
+      <li>The DN-X600 is updated differently (Denon's DDJ Updater over USB, with its own CRC-32 file check). This page builds that check, worked out from the updater program, and its browser flasher sends the same messages as Denon's updater, checked against a capture of that updater flashing a real DN-X600.</li>
       <li>The same checks that the working DN-X1700 firmware passed were run on this one, and all passed: every changed address is checked against the original file, the patched code was run in a simulator at 44.1, 48 and 96 kHz, and the result is verified against a reference build.</li>
     </ul>
     <p><strong>If it doesn't work</strong>, the most likely outcome is that USB audio on the Mac still doesn't work. The rest of the mixer should be unaffected: the changed code only runs when a computer asks the mixer about its USB audio settings, and the start-up code and the updater are not touched. You can go back by flashing Denon's original <code>X600FW.BIN</code> the same way.</p>
     <p>The real risk is the same as with any firmware update: a power cut while the update is writing (see below). <strong>No guarantees</strong> of any kind.</p>
-    <p class="hint">Tried it? Please <a href="#report">report back</a>, whether it worked or not. Questions and discussion: the <a href="https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550">Engine DJ community thread</a>.</p>
+    <p class="hint">Tried it? Please <a href="#report">report back</a>, whether it worked or not: more reports help everyone. Questions and discussion: the <a href="https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550">Engine DJ community thread</a>.</p>
   </section>
 
   <section class="risk" role="note" aria-label="Warning">
@@ -252,7 +253,7 @@
       <ul>
         <li>The update <strong>rewrites the mixer's flash chip</strong>. If power or the USB cable is lost during the write, the mixer may not start again and only an external flash programmer (the chip is an EN29LV160BB) can recover it. Denon's own instructions say the same.</li>
         <li><strong>Your settings may be reset</strong> to factory defaults. Write them down or photograph them first.</li>
-        <li>The fix is tested on one DN-X1700, with macOS 27 on Apple Silicon and with Windows. It is <strong>not tested on a DN-X600</strong>. <a href="https://github.com/WhatMeansGithub/DN-X1700/blob/master/docs/x600.md">Technical details</a>.</li>
+        <li>The fix is tested on one DN-X1700 (macOS 27 on Apple Silicon and Windows) and was <strong>flashed on a real DN-X600 by one owner</strong>. The author has no DN-X600. <a href="https://github.com/WhatMeansGithub/DN-X1700/blob/master/docs/x600.md">Technical details</a>.</li>
       </ul>
     </div>
   </section>
@@ -296,7 +297,7 @@
         <p class="placeholder" id="s3wait">Waiting for your firmware file in step 2.</p>
         <div id="s3ready" hidden>
           <label class="ack"><input type="checkbox" id="ack">
-            <span>I have read the warnings. I understand this fix has not been tested on a real DN-X600, that flashing can permanently damage my mixer, that my settings will be reset, and that I alone am responsible for the outcome.</span></label>
+            <span>I have read the warnings. I understand this fix has been confirmed by only one DN-X600 owner, that flashing can permanently damage my mixer, that my settings will be reset, and that I alone am responsible for the outcome.</span></label>
           <button class="btn big" id="dl" disabled>
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>
             Download X600FW.BIN</button>
@@ -313,10 +314,9 @@
       <div class="badge" aria-hidden="true"><span>4</span></div>
       <div class="step-body">
         <h2>Flash it with Denon's updater</h2>
-        <p class="hint">The DN-X600 has no USB stick port. It is updated from a computer with Denon's <strong>DDJ Updater</strong>, which is in the zip from step 1 (Windows: <code>DDJUpdater-2.0.msi</code>). The Mac version of the updater in that zip is too old to run on current macOS, so use a Windows PC.</p>
-        <h3 style="margin:14px 0 6px;font-size:1.02rem">Option A: flash straight from this page (Mac or Windows) <span class="chip exp" style="margin-left:6px">experimental</span></h3>
-        <p class="hint">Needs <strong>Chrome or Edge</strong> (Safari and Firefox can't talk to USB HID devices). No Denon software needed. This sends the file to the mixer using the same
-          messages as Denon's updater, which were read out of that program but <strong>have never been run against a real DN-X600</strong>. Nothing is written to the mixer's flash until the final <em>Execute</em> step;
+        <p class="hint">The DN-X600 has no USB stick port: it is updated from a computer over USB. Use <strong>Option A</strong> (Chrome or Edge, on a Mac or Windows PC) or <strong>Option B</strong>, Denon's <strong>DDJ Updater</strong>, which is in the zip from step 1 (Windows: <code>DDJUpdater-2.0.msi</code>). The Mac version of Denon's updater is too old to run on current macOS.</p>
+        <h3 style="margin:14px 0 6px;font-size:1.02rem">Option A: flash straight from this page (Mac or Windows)</h3>
+        <p class="hint">Needs <strong>Chrome or Edge</strong> (Safari and Firefox can't talk to USB HID devices). No Denon software needed. This sends the file to the mixer using the same messages as Denon's updater, checked against a capture of that updater, and it has been <strong>confirmed working on a real DN-X600</strong> by one owner. Nothing is written to the mixer's flash until the final <em>Execute</em> step;
           you can stop before that.</p>
         <div id="wfno" class="callout warn" hidden><strong>This browser can't do it.</strong> WebHID is missing. Open this page in Chrome or Edge, or use Option B below.</div>
         <div id="wfui" class="wfcard">
@@ -329,7 +329,7 @@
               <input id="wffileinput" type="file" hidden accept=".zip,.bin,.BIN">
               <p class="hint">Once Denon's file is loaded (in step 2, or with the button above: the zip as downloaded, or <code>X600FW.BIN</code>) you get both versions to choose from.
                 An already-patched file from this page is accepted too. Anything else is refused. <strong>First time? Send Denon's original first</strong>: it changes nothing if everything works.</p></div></li>
-            <li><div><label class="ack"><input type="checkbox" id="wfack"> <span>I understand this has not been tested on a real DN-X600, that a power or cable loss during Execute can leave the mixer unable to start, and that I alone am responsible.</span></label></div></li>
+            <li><div><label class="ack"><input type="checkbox" id="wfack"> <span>I understand that a power or cable loss during Execute can leave the mixer unable to start, that my settings may be reset, and that I alone am responsible.</span></label></div></li>
             <li><div class="wf-row"><button class="btn big" id="wfgo" type="button" disabled>Start</button>
               <label><input type="checkbox" id="wfdry"> dry run (send nothing)</label>
               <button class="link-btn" id="wfstop" type="button" hidden>stop (only possible before Execute)</button></div></li>
@@ -369,7 +369,7 @@
       <div class="badge" aria-hidden="true"><span>5</span></div>
       <div class="step-body">
         <h2>Tell us how it went</h2>
-        <p>This is how the DN-X600 version stops being experimental. Please <a href="https://github.com/WhatMeansGithub/DN-X1700/issues">open an issue on GitHub</a> (or reply in the <a href="https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550">thread on the Engine DJ community forum</a>), whether it worked or not, with:</p>
+        <p>One owner has confirmed this version; more reports make it more trustworthy. Please <a href="https://github.com/WhatMeansGithub/DN-X1700/issues">open an issue on GitHub</a> (or reply in the <a href="https://community.enginedj.com/t/fixed-the-dn-x1700s-usb-audio-on-modern-macos-free-firmware-patch-no-driver-needed/71550">thread on the Engine DJ community forum</a>), whether it worked or not, with:</p>
         <ul>
           <li>Your Mac model and macOS version.</li>
           <li>Does <strong>DN-X600</strong> show up in Audio MIDI Setup with 8 inputs and 8 outputs?</li>

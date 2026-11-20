@@ -1,4 +1,4 @@
-// DN-X600 firmware transfer over WebHID (Chrome / Edge, macOS / Windows / Linux). EXPERIMENTAL.
+// DN-X600 firmware transfer over WebHID (Chrome / Edge, macOS / Windows / Linux). Confirmed working on a real DN-X600 by one owner.
 // Protocol as read from Denon's DDJ Updater 2.0.0 (ddj_updater.exe, class dnhid::*) and checked against a USB capture of that updater
 // flashing a real DN-X600 (see docs/x600.md "Updater protocol"). Runs in the browser and in Node (tests drive it with a simulated mixer).
 // Nothing is uploaded anywhere.

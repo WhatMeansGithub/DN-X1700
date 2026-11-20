@@ -1,10 +1,9 @@
 # Testing the DN-X600 firmware fix
 
-Thanks for offering to test this. Nobody has tried it on a real DN-X600 yet, so every result helps, including "it didn't work".
+Thanks for offering to test this. One owner has already flashed it on a real DN-X600 with the browser flasher, so the flashing side works; more results are still valuable, especially **Mac audio and MIDI** and a second unit.
 
 **What this is:** a small firmware change that should make the DN-X600's USB audio and MIDI work with current macOS. It also comes with a web page that can flash the mixer from
-Chrome or Edge on a Mac or Windows PC, because Denon's own updater no longer runs on modern macOS. That web flasher is brand new and has only been tested against a simulation, which is why
-we want to compare it with Denon's real updater first.
+Chrome or Edge on a Mac or Windows PC, because Denon's own updater no longer runs on modern macOS. That web flasher is new, so if you can, compare it with Denon's real updater first.
 
 **What you need:** the DN-X600 and its USB cable, a Windows PC with Chrome or Edge, and about an hour. A Mac helps for the last step but isn't required.
 
